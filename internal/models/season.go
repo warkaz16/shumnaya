@@ -14,5 +14,5 @@ type Season struct {
 	EndDate   *time.Time `json:"end_date"`
 
 	// Matches []Match             `gorm:"foreignKey:SeasonID"`
-	// Stats   []PlayerSeasonStats `gorm:"foreignKey:SeasonID"`
+	Stats []PlayerStats `gorm:"foreignKey:SeasonID"`
 }
