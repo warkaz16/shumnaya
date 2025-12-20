@@ -9,4 +9,9 @@ type Player struct {
 	Email        string
 	PasswordHash string
 	Rating       int
+
+	// Relations
+	Wins      []Match    `gorm:"foreignKey:WinnerID"`
+	Losses    []Match    `gorm:"foreignKey:LoserID"`
+	Standings []Standing `gorm:"foreignKey:PlayerID"`
 }

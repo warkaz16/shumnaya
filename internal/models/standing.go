@@ -6,7 +6,9 @@ import "gorm.io/gorm"
 type Standing struct {
 	gorm.Model
 	PlayerID uint
+	Player   *Player `gorm:"foreignKey:PlayerID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	SeasonID uint
+	Season   *Season `gorm:"foreignKey:SeasonID;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	Wins     int
 	Losses   int
 	Points   int

@@ -13,4 +13,8 @@ type Season struct {
 	StartDate time.Time
 	EndDate   time.Time
 	IsActive  bool
+
+	// Relations
+	Matches   []Match    `gorm:"foreignKey:SeasonID"`
+	Standings []Standing `gorm:"foreignKey:SeasonID"`
 }
