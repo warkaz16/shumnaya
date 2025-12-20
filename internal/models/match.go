@@ -8,15 +8,15 @@ import (
 
 type Match struct {
 	gorm.Model
-	
+
 	WinnerID            uint
-	Winner              *Player
+	Winner              Player
 
 	LoserID             uint
-	Loser               *Player
+	Loser               Player
 
 	SeasonID            uint
-	Season              *Season
+	Season              Season
 
 	Score               string
 	WinnerRatingChange  int

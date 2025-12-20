@@ -6,11 +6,11 @@ type Standing struct {
 	gorm.Model
 
 	PlayerID uint
-	Player   *Player
+	Player   Player
 
 	SeasonID uint
-	Season   *Season
-	
+	Season   Season
+
 	Wins     int
 	Losses   int
 	Points   int
