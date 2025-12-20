@@ -6,7 +6,7 @@ import (
 	"gorm.io/gorm"
 )
 
-// Season represents a season for matches and standings.
+// Season represents a competition period.
 type Season struct {
 	gorm.Model
 	Name      string

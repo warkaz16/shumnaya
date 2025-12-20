@@ -6,15 +6,19 @@ import (
 	"gorm.io/gorm"
 )
 
-// Match represents a played match between two players.
+// Match represents a played game between two players within a season.
 type Match struct {
 	gorm.Model
-	WinnerID           uint
-	Winner             *Player  `gorm:"foreignKey:WinnerID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
-	LoserID            uint
-	Loser              *Player  `gorm:"foreignKey:LoserID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
-	SeasonID           uint
-	Season             *Season  `gorm:"foreignKey:SeasonID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+
+	WinnerID uint
+	Winner   Player
+
+	LoserID uint
+	Loser   Player
+
+	SeasonID uint
+	Season   Season
+
 	Score              string
 	WinnerRatingChange int
 	LoserRatingChange  int

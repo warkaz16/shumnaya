@@ -2,7 +2,7 @@ package models
 
 import "gorm.io/gorm"
 
-// Player represents a player in the system.
+// Player represents a participant in the system.
 type Player struct {
 	gorm.Model
 	Name         string
