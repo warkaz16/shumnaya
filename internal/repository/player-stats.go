@@ -9,7 +9,7 @@ import (
 )
 
 type PlayerStatsRepo interface {
-	GetPlayerID(ctx context.Context, playerID uint) (*models.PlayerStats, error)
+	GetPlayerID(ctx context.Context, userID uint) (*models.PlayerStats, error)
 	Update(ctx context.Context, stats *models.PlayerStats) error
 }
 
@@ -22,12 +22,12 @@ func NewPlayerStatsRepo(db *gorm.DB, logger slog.Logger) PlayerStatsRepo {
 	return &playerStatsRepo{db: db, logger: logger}
 }
 
-func (r *playerStatsRepo) GetPlayerID(ctx context.Context, playerID uint,
+func (r *playerStatsRepo) GetPlayerID(ctx context.Context, userID uint,
 ) (*models.PlayerStats, error) {
 
 	var stats models.PlayerStats
 
-	err := r.db.WithContext(ctx).Where("player_id = ?", playerID).First(&stats).Error
+	err := r.db.WithContext(ctx).Where("user_id = ?", userID).First(&stats).Error
 	if err != nil {
 		return nil, err
 	}

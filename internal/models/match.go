@@ -9,10 +9,10 @@ type Match struct {
 	Season   Season
 
 	Player1ID uint
-	Player1   Player
+	Player1   User
 
 	Player2ID uint
-	Player2   Player
+	Player2   User
 
 	Sets []MatchSet
 }
