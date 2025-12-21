@@ -23,3 +23,11 @@ type Match struct {
 	LoserRatingChange  int       `json:"loser_rating_change,omitempty" gorm:"column:loser_rating_change"`
 	PlayedAt           time.Time `json:"played_at" gorm:"column:played_at"`
 }
+
+
+type MatchFilter struct {
+	SeasonID *uint
+	PlayerID *uint
+	FromDate *time.Time
+	ToDate   *time.Time
+}
