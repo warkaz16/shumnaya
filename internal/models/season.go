@@ -12,4 +12,6 @@ type Season struct {
 	StartDate time.Time
 	EndDate   time.Time
 	IsActive  bool
+
+	Matches []Match // получение матчей по сезонам
 }

@@ -8,4 +8,6 @@ type Player struct {
 	Email        string
 	PasswordHash string
 	Rating       int
+
+	Matches []Match // история матчей по игроку
 }
