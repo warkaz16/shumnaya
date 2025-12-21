@@ -17,7 +17,7 @@ type matchHandler struct {
 	logger  *slog.Logger
 }
 
-func NewMatchHandler(service service.MatchService, logger *slog.Logger) service.MatchService {
+func NewMatchHandler(service service.MatchService, logger *slog.Logger) *matchHandler {
 	return &matchHandler{
 		service: service,
 		logger:  logger,
