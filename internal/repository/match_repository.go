@@ -55,14 +55,6 @@ func (r *matchRepository) Get() ([]models.Match, error) {
 	return matches, err
 }
 
-type matchRepository struct {
-	db *gorm.DB
-}
-
-func NewMatchRepository(db *gorm.DB) MatchRepository {
-	return &matchRepository{db: db}
-}
-
 func (r *matchRepository) Create(match *models.Match) error {
 	return r.db.Create(match).Error
 }

@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"log/slog"
 	"time"
 
 	"shumnaya/internal/models"
@@ -13,17 +14,21 @@ import (
 
 type MatchService interface {
 	RecordMatch(winnerID, loserID, seasonID uint, score string) (*models.Match, error)
+
+	Get() ([]models.Match, error)
+	GetFiltered(filter *models.MatchFilter) ([]models.Match, error)
 }
 
 type matchService struct {
 	db           *gorm.DB
+	logger       *slog.Logger
 	matchRepo    repository.MatchRepository
 	playerRepo   repository.PlayerRepository
 	standingRepo repository.StandingRepository
 }
 
-func NewMatchService(db *gorm.DB, mr repository.MatchRepository, pr repository.PlayerRepository, sr repository.StandingRepository) MatchService {
-	return &matchService{db: db, matchRepo: mr, playerRepo: pr, standingRepo: sr}
+func NewMatchService(db *gorm.DB, log *slog.Logger, mr repository.MatchRepository, pr repository.PlayerRepository, sr repository.StandingRepository) MatchService {
+	return &matchService{db: db, logger: log, matchRepo: mr, playerRepo: pr, standingRepo: sr}
 }
 
 func (s *matchService) RecordMatch(winnerID, loserID, seasonID uint, score string) (*models.Match, error) {
@@ -36,7 +41,7 @@ func (s *matchService) RecordMatch(winnerID, loserID, seasonID uint, score strin
 		return nil, tx.Error
 	}
 
-	matchRepoTx := repository.NewMatchRepository(tx)
+	matchRepoTx := repository.NewMatchRepository(tx, s.logger)
 	standingRepoTx := repository.NewStandingRepository(tx)
 
 	var winner models.Player
@@ -125,4 +130,28 @@ func (s *matchService) RecordMatch(winnerID, loserID, seasonID uint, score strin
 	}
 
 	return match, nil
+}
+
+func (s *matchService) GetFiltered(filter *models.MatchFilter) ([]models.Match, error) {
+	return s.matchRepo.GetFiltered(filter)
+}
+
+func (s *matchService) Get() ([]models.Match, error) {
+	// Логирование начала операции
+	s.logger.Info("получение всех матчей")
+
+	// Получение матчей из репозитория
+	matches, err := s.matchRepo.Get()
+	if err != nil {
+		s.logger.Error("ошибка при получении матчей", "ошибка", err)
+		return nil, err
+	}
+
+	// Валидация результата
+	if matches == nil {
+		return []models.Match{}, errors.New("матчей нет")
+	}
+
+	s.logger.Info("матчи успешно получены", "количество", len(matches))
+	return matches, nil
 }
