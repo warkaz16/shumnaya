@@ -42,7 +42,7 @@ func (s *matchService) RecordMatch(winnerID, loserID, seasonID uint, score strin
 	}
 
 	matchRepoTx := repository.NewMatchRepository(tx, s.logger)
-	standingRepoTx := repository.NewStandingRepository(tx)
+	standingRepoTx := repository.NewStandingRepository(tx, s.logger)
 
 	var winner models.Player
 	if err := tx.First(&winner, winnerID).Error; err != nil {
