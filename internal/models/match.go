@@ -23,3 +23,11 @@ type Match struct {
 	LoserRatingChange   int
 	PlayedAt            time.Time
 }
+
+
+type MatchFilter struct {
+	SeasonID *uint
+	PlayerID *uint
+	FromDate *time.Time
+	ToDate   *time.Time
+}
