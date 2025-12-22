@@ -15,6 +15,7 @@ type MatchRepository interface {
 
 	GetBySeasonID(seasonID uint) ([]models.Match, error)
 	GetByPlayerID(playerID uint) ([]models.Match, error)
+	GetRecentByPlayerID(playerID uint, limit int) ([]models.Match, error)
 
 	GetFiltered(filter *models.MatchFilter) ([]models.Match, error)
 }
@@ -85,6 +86,18 @@ func (r *matchRepository) GetByPlayerID(playerID uint) ([]models.Match, error) {
 	var matches []models.Match
 	if err := r.db.Where("winner_id = ? OR loser_id = ?", playerID, playerID).
 		Preload("Winner").Preload("Loser").Preload("Season").
+		Find(&matches).Error; err != nil {
+		return nil, err
+	}
+	return matches, nil
+}
+
+func (r *matchRepository) GetRecentByPlayerID(playerID uint, limit int) ([]models.Match, error) {
+	var matches []models.Match
+	if err := r.db.Where("winner_id = ? OR loser_id = ?", playerID, playerID).
+		Preload("Winner").Preload("Loser").Preload("Season").
+		Order("played_at DESC").
+		Limit(limit).
 		Find(&matches).Error; err != nil {
 		return nil, err
 	}
