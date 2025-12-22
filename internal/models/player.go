@@ -11,3 +11,13 @@ type Player struct {
 
 	Matches []Match `json:"matches,omitempty" gorm:"-"` // история матчей по игроку (поле для удобства, запросы через репозиторий)
 }
+
+
+type PlayerProfile struct {
+	Player        Player  `json:"player"`
+	Rating        int     `json:"rating"`
+	TotalMatches  int     `json:"total_matches"`
+	Wins          int     `json:"wins"`
+	Losses        int     `json:"losses"`
+	RecentMatches []Match `json:"recent_matches,omitempty"`
+}
