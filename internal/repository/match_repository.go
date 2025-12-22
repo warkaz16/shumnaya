@@ -37,6 +37,10 @@ func (r *matchRepository) GetFiltered(filter *models.MatchFilter) ([]models.Matc
 		query = query.Where("season_id = ?", *filter.SeasonID)
 	}
 
+	if filter.PlayerID != nil {
+		query = query.Where("winner_id = ? OR loser_id = ?", *filter.PlayerID, *filter.PlayerID)
+	}
+
 	if filter.FromDate != nil {
 		query = query.Where("played_at >= ?", *filter.FromDate)
 	}
