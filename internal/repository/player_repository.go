@@ -18,12 +18,12 @@ type PlayerRepository interface {
 }
 
 type playerRepository struct {
-	db  *gorm.DB
-	log *slog.Logger
+	db     *gorm.DB
+	logger *slog.Logger
 }
 
-func NewPlayerRepository(db *gorm.DB, log *slog.Logger) PlayerRepository {
-	return &playerRepository{db: db, log: log}
+func NewPlayerRepository(db *gorm.DB, logger *slog.Logger) PlayerRepository {
+	return &playerRepository{db: db, logger: logger}
 }
 
 func (r *playerRepository) GetByID(id uint) (*models.Player, error) {
@@ -31,7 +31,7 @@ func (r *playerRepository) GetByID(id uint) (*models.Player, error) {
 
 	err := r.db.First(&player, id).Error
 	if err != nil {
-		r.log.Error("ошибка получения игрока по ID", "id", id, "error", err)
+		r.logger.Error("ошибка получения игрока по ID", "id", id, "error", err)
 		return nil, err
 	}
 
@@ -43,18 +43,17 @@ func (r *playerRepository) GetByEmail(email string) (*models.Player, error) {
 
 	err := r.db.Where("email = ?", email).First(&player).Error
 	if err != nil {
-		r.log.Error("ошибка получения игрока по email", "email", email, "error", err)
+		r.logger.Error("ошибка получения игрока по email", "email", email, "error", err)
 		return nil, err
 	}
 
 	return &player, nil
 }
 
-
 func (r *playerRepository) Create(player *models.Player) error {
 	err := r.db.Create(player).Error
 	if err != nil {
-		r.log.Error("ошибка создания игрока", "error", err)
+		r.logger.Error("ошибка создания игрока", "error", err)
 		return err
 	}
 	return nil
@@ -63,7 +62,7 @@ func (r *playerRepository) Create(player *models.Player) error {
 func (r *playerRepository) Update(player *models.Player) error {
 	err := r.db.Save(player).Error
 	if err != nil {
-		r.log.Error("ошибка обновления игрока", "id", player.ID, "error", err)
+		r.logger.Error("ошибка обновления игрока", "id", player.ID, "error", err)
 		return err
 	}
 	return nil
@@ -72,7 +71,7 @@ func (r *playerRepository) Update(player *models.Player) error {
 func (r *playerRepository) Delete(id uint) error {
 	err := r.db.Delete(&models.Player{}, id).Error
 	if err != nil {
-		r.log.Error("ошибка удаления игрока", "id", id, "error", err)
+		r.logger.Error("ошибка удаления игрока", "id", id, "error", err)
 		return err
 	}
 
