@@ -17,6 +17,8 @@ type PlayerService interface {
 
 }
 
+const defaultRecentMatchesLimit = 5
+
 type playerService struct {
 	db         *gorm.DB
 	logger     *slog.Logger
@@ -91,10 +93,16 @@ func (s *playerService) GetPlayerProfile(id uint) (*models.PlayerProfile, error)
 		return nil, err
 	}
 
+	recentMatches, err := s.matchRepo.GetRecentByPlayerID(id, defaultRecentMatchesLimit)
+	if err != nil {
+		s.logger.Error("service: failed to get recent player matches", "player_id", id, "error", err)
+		return nil, err
+	}
+
 	total := len(matches)
 	wins := 0
 	for _, m := range matches {
-		
+
 		if m.WinnerID == id {
 			wins++
 		}
@@ -103,11 +111,12 @@ func (s *playerService) GetPlayerProfile(id uint) (*models.PlayerProfile, error)
 	losses := total - wins
 
 	profile := &models.PlayerProfile{
-		Player:       *player,
-		Rating:       player.Rating,
-		TotalMatches: total,
-		Wins:         wins,
-		Losses:       losses,
+		Player:        *player,
+		Rating:        player.Rating,
+		TotalMatches:  total,
+		Wins:          wins,
+		Losses:        losses,
+		RecentMatches: recentMatches,
 	}
 
 	return profile, nil
