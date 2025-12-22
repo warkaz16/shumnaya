@@ -3,6 +3,7 @@ package service
 import (
 	"errors"
 	"log/slog"
+ "golang.org/x/crypto/bcrypt"
 
 	"shumnaya/internal/models"
 	"shumnaya/internal/repository"
@@ -12,6 +13,8 @@ import (
 
 type PlayerService interface {
 	GetPlayerProfile(id uint) (*models.PlayerProfile, error)
+		RegisterPlayer(name, email, password string) error
+
 }
 
 type playerService struct {
@@ -24,6 +27,52 @@ type playerService struct {
 func NewPlayerService(db *gorm.DB, log *slog.Logger, pr repository.PlayerRepository, mr repository.MatchRepository) PlayerService {
 	return &playerService{db: db, logger: log, playerRepo: pr, matchRepo: mr}
 }
+
+func (s *playerService) RegisterPlayer(
+	name string,
+	email string,
+	password string,
+) error {
+
+	if _, err := s.playerRepo.GetByEmail(email); err == nil {
+		return errors.New("игрок с таким email уже существует")
+	}
+
+	hash, err := bcrypt.GenerateFromPassword(
+		[]byte(password),
+		bcrypt.DefaultCost,
+	)
+	if err != nil {
+		if s.logger != nil {
+			s.logger.Error(
+				"service: ошибка хеширования пароля",
+				"error", err,
+			)
+		}
+		return err
+	}
+
+	player := &models.Player{
+		Name:         name,
+		Email:        email,
+		PasswordHash: string(hash),
+		Rating:       1000,
+	}
+
+	if err := s.playerRepo.Create(player); err != nil {
+		if s.logger != nil {
+			s.logger.Error(
+				"service: ошибка регистрации игрока",
+				"email", email,
+				"error", err,
+			)
+		}
+		return err
+	}
+
+	return nil
+}
+
 
 func (s *playerService) GetPlayerProfile(id uint) (*models.PlayerProfile, error) {
 	if id == 0 {
