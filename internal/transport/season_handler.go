@@ -13,26 +13,31 @@ import (
 )
 
 type seasonHandler struct {
-	repo    repository.SeasonRepository
-	service service.SeasonService
-	logger  *slog.Logger
+	repo     repository.SeasonRepository
+	service  service.SeasonService
+	standing service.StandingService
+	logger   *slog.Logger
 }
 
 func NewSeasonHandler(
 	r *gin.Engine,
 	repo repository.SeasonRepository,
 	service service.SeasonService,
+	standing service.StandingService,
 	logger *slog.Logger,
+
 ) {
 	h := &seasonHandler{
-		repo:    repo,
-		service: service,
-		logger:  logger,
+		repo:     repo,
+		service:  service,
+		logger:   logger,
+		standing: standing,
 	}
 
 	r.GET("/seasons", h.getAll)
 	r.GET("/seasons/:id", h.getByID)
 	r.POST("/seasons", h.create)
+	r.GET("/seasons/:id/standings", h.getByIDstandings)
 }
 
 func (h *seasonHandler) getAll(c *gin.Context) {
@@ -80,4 +85,43 @@ func (h *seasonHandler) create(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, season)
+}
+
+func (h *seasonHandler) getByIDstandings(c *gin.Context) {
+	id, err := strconv.Atoi(c.Param("id"))
+	if err != nil || id <= 0 {
+		h.logger.Error("handler: некорректный id сезона")
+		c.JSON(http.StatusBadRequest, gin.H{"error": "некорректный id"})
+		return
+	}
+
+	season, err := h.repo.GetByID(uint(id))
+	if err != nil {
+		h.logger.Error("handler: сезон не найден", "season_id", id, "error", err)
+		c.JSON(http.StatusNotFound, gin.H{"error": "сезон не найден"})
+		return
+	}
+
+	standing, err := h.standing.GetSeasonStandings(season.ID)
+
+	if err != nil {
+		h.logger.Error("Ошибка при поиске standing")
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
+		return
+	}
+
+	if len(standing) == 0 {
+		h.logger.Error("season standings пустые")
+		c.JSON(http.StatusOK, gin.H{
+			"season_id": id,
+			"standings": standing,
+			"count":     len(standing),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, standing)
+
 }
