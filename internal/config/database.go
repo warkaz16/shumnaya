@@ -3,16 +3,16 @@ package config
 import (
 	"fmt"
 	"log"
+	"log/slog"
 	"os"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"gorm.io/gorm/logger"
 )
 
 var DB *gorm.DB
 
-func ConnectDB() {
+func ConnectDB(logger *slog.Logger) *gorm.DB {
 	var err error
 
 	host := os.Getenv("DB_HOST")
@@ -48,13 +48,16 @@ func ConnectDB() {
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=%s",
 		host, user, password, dbname, port, sslmode)
 
-	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{
-		Logger: logger.Default.LogMode(logger.Info),
-	})
+	DB, err = gorm.Open(postgres.New(postgres.Config{
+		DSN:                  dsn,
+		PreferSimpleProtocol: true,
+	}), &gorm.Config{})
 
 	if err != nil {
+		logger.Error("ошибка подключения к БД", "error", err)
 		log.Fatal("Ошибка подключения к БД:", err)
 	}
 
 	log.Println("БД успешно подключена")
+	return DB
 }
