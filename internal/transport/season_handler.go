@@ -6,14 +6,12 @@ import (
 	"strconv"
 
 	"shumnaya/internal/models"
-	"shumnaya/internal/repository"
 	"shumnaya/internal/service"
 
 	"github.com/gin-gonic/gin"
 )
 
-type seasonHandler struct {
-	repo     repository.SeasonRepository
+type SeasonHandler struct {
 	service  service.SeasonService
 	standing service.StandingService
 	logger   *slog.Logger
@@ -21,27 +19,27 @@ type seasonHandler struct {
 
 func NewSeasonHandler(
 	r *gin.Engine,
-	repo repository.SeasonRepository,
 	service service.SeasonService,
 	standing service.StandingService,
 	logger *slog.Logger,
 
-) {
-	h := &seasonHandler{
-		repo:     repo,
+) *SeasonHandler {
+	return &SeasonHandler{
 		service:  service,
 		logger:   logger,
 		standing: standing,
 	}
+}
 
+func (h *SeasonHandler) RegisterRoutes(r *gin.Engine) {
 	r.GET("/seasons", h.getAll)
 	r.GET("/seasons/:id", h.getByID)
 	r.POST("/seasons", h.create)
 	r.GET("/seasons/:id/standings", h.getByIDstandings)
 }
 
-func (h *seasonHandler) getAll(c *gin.Context) {
-	seasons, err := h.repo.GetAll()
+func (h *SeasonHandler) getAll(c *gin.Context) {
+	seasons, err := h.service.GetAllSeasons()
 	if err != nil {
 		h.logger.Error("handler: ошибка получения списка сезонов", "error", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "не удалось получить сезоны"})
@@ -51,7 +49,7 @@ func (h *seasonHandler) getAll(c *gin.Context) {
 	c.JSON(http.StatusOK, seasons)
 }
 
-func (h *seasonHandler) getByID(c *gin.Context) {
+func (h *SeasonHandler) getByID(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil || id <= 0 {
 		h.logger.Error("handler: некорректный id сезона")
@@ -59,7 +57,7 @@ func (h *seasonHandler) getByID(c *gin.Context) {
 		return
 	}
 
-	season, err := h.repo.GetByID(uint(id))
+	season, err := h.service.GetSeasonByID(uint(id))
 	if err != nil {
 		h.logger.Error("handler: сезон не найден", "season_id", id, "error", err)
 		c.JSON(http.StatusNotFound, gin.H{"error": "сезон не найден"})
@@ -69,7 +67,7 @@ func (h *seasonHandler) getByID(c *gin.Context) {
 	c.JSON(http.StatusOK, season)
 }
 
-func (h *seasonHandler) create(c *gin.Context) {
+func (h *SeasonHandler) create(c *gin.Context) {
 	var season models.Season
 
 	if err := c.ShouldBindJSON(&season); err != nil {
@@ -87,7 +85,7 @@ func (h *seasonHandler) create(c *gin.Context) {
 	c.JSON(http.StatusCreated, season)
 }
 
-func (h *seasonHandler) getByIDstandings(c *gin.Context) {
+func (h *SeasonHandler) getByIDstandings(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil || id <= 0 {
 		h.logger.Error("handler: некорректный id сезона")
@@ -95,7 +93,7 @@ func (h *seasonHandler) getByIDstandings(c *gin.Context) {
 		return
 	}
 
-	season, err := h.repo.GetByID(uint(id))
+	season, err := h.service.GetSeasonByID(uint(id))
 	if err != nil {
 		h.logger.Error("handler: сезон не найден", "season_id", id, "error", err)
 		c.JSON(http.StatusNotFound, gin.H{"error": "сезон не найден"})

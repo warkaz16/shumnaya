@@ -12,18 +12,21 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type matchHandler struct {
+type MatchHandler struct {
 	service service.MatchService
 	logger  *slog.Logger
 }
 
-func NewMatchHandler(r *gin.Engine, service service.MatchService, logger *slog.Logger) {
-	h := &matchHandler{service: service, logger: logger}
+func NewMatchHandler(r *gin.Engine, service service.MatchService, logger *slog.Logger) *MatchHandler {
+	return &MatchHandler{service: service, logger: logger}
+}
+
+func (h *MatchHandler) RegisterRoutes(r *gin.Engine) {
 	r.GET("/matches", h.GetMatches)
 	r.POST("/matches", h.CreateMatch)
 }
 
-func (h *matchHandler) GetMatches(c *gin.Context) {
+func (h *MatchHandler) GetMatches(c *gin.Context) {
 	filter := &models.MatchFilter{}
 
 	if seasonIDStr := c.Query("season_id"); seasonIDStr != "" {
@@ -87,7 +90,7 @@ func (h *matchHandler) GetMatches(c *gin.Context) {
 	})
 }
 
-func (h *matchHandler) CreateMatch(c *gin.Context) {
+func (h *MatchHandler) CreateMatch(c *gin.Context) {
 	var req models.CreateMatchRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
 		h.logger.Warn("invalid request body", "error", err)
