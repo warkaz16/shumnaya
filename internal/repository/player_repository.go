@@ -8,6 +8,7 @@ import (
 )
 
 type PlayerRepository interface {
+    WithDB(tx *gorm.DB) PlayerRepository
 	Create(player *models.Player) error
 
 	GetByID(id uint) (*models.Player, error)
@@ -24,6 +25,10 @@ type playerRepository struct {
 
 func NewPlayerRepository(db *gorm.DB, logger *slog.Logger) PlayerRepository {
 	return &playerRepository{db: db, logger: logger}
+}
+
+func (r *playerRepository) WithDB(tx *gorm.DB) PlayerRepository {
+	return &playerRepository{db: tx, logger: r.logger}
 }
 
 func (r *playerRepository) GetByID(id uint) (*models.Player, error) {

@@ -36,100 +36,92 @@ func (s *matchService) RecordMatch(winnerID, loserID, seasonID uint, score strin
 		return nil, errors.New("winner and loser cannot be the same")
 	}
 
-	tx := s.db.Begin()
-	if tx.Error != nil {
-		return nil, tx.Error
-	}
+	var created *models.Match
 
-	matchRepoTx := repository.NewMatchRepository(tx, s.logger)
-	standingRepoTx := repository.NewStandingRepository(tx, s.logger)
+	err := s.db.Transaction(func(tx *gorm.DB) error {
+		// Репозитории в контексте транзакции
+		matchRepoTx := s.matchRepo.WithDB(tx)
+		standingRepoTx := s.standingRepo.WithDB(tx)
 
-	var winner models.Player
-	if err := tx.First(&winner, winnerID).Error; err != nil {
-		tx.Rollback()
+		var winner models.Player
+		if err := tx.First(&winner, winnerID).Error; err != nil {
+			return err
+		}
+
+		var loser models.Player
+		if err := tx.First(&loser, loserID).Error; err != nil {
+			return err
+		}
+
+		wStanding, err := standingRepoTx.GetByPlayerAndSeason(winnerID, seasonID)
+		if err != nil && err != gorm.ErrRecordNotFound {
+			return err
+		}
+		if wStanding == nil || err == gorm.ErrRecordNotFound {
+			wStanding = &models.Standing{PlayerID: winnerID, SeasonID: seasonID}
+		}
+
+		lStanding, err := standingRepoTx.GetByPlayerAndSeason(loserID, seasonID)
+		if err != nil && err != gorm.ErrRecordNotFound {
+			return err
+		}
+		if lStanding == nil || err == gorm.ErrRecordNotFound {
+			lStanding = &models.Standing{PlayerID: loserID, SeasonID: seasonID}
+		}
+
+		wGames := wStanding.Wins + wStanding.Losses
+		lGames := lStanding.Wins + lStanding.Losses
+
+		winnerNew := elo.NewRating(winner.Rating, loser.Rating, true, wGames, wStanding.Wins)
+		loserNew := elo.NewRating(loser.Rating, winner.Rating, false, lGames, lStanding.Wins)
+
+		winnerChange := winnerNew - winner.Rating
+		loserChange := loserNew - loser.Rating
+
+		match := &models.Match{
+			WinnerID:           winnerID,
+			LoserID:            loserID,
+			SeasonID:           seasonID,
+			Score:              score,
+			WinnerRatingChange: winnerChange,
+			LoserRatingChange:  loserChange,
+			PlayedAt:           time.Now(),
+		}
+
+		if err := matchRepoTx.Create(match); err != nil {
+			return err
+		}
+
+		winner.Rating = winnerNew
+		loser.Rating = loserNew
+
+		if err := tx.Save(&winner).Error; err != nil {
+			return err
+		}
+		if err := tx.Save(&loser).Error; err != nil {
+			return err
+		}
+
+		wStanding.Wins += 1
+		wStanding.Points += 1
+
+		lStanding.Losses += 1
+
+		if err := standingRepoTx.CreateOrUpdate(wStanding); err != nil {
+			return err
+		}
+		if err := standingRepoTx.CreateOrUpdate(lStanding); err != nil {
+			return err
+		}
+
+		created = match
+		return nil
+	})
+
+	if err != nil {
 		return nil, err
 	}
-
-	var loser models.Player
-	if err := tx.First(&loser, loserID).Error; err != nil {
-		tx.Rollback()
-		return nil, err
-	}
-
-	wStanding, err := standingRepoTx.GetByPlayerAndSeason(winnerID, seasonID)
-	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-		tx.Rollback()
-		return nil, err
-	}
-	if wStanding == nil {
-		wStanding = &models.Standing{PlayerID: winnerID, SeasonID: seasonID}
-	}
-
-	lStanding, err := standingRepoTx.GetByPlayerAndSeason(loserID, seasonID)
-	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-		tx.Rollback()
-		return nil, err
-	}
-	if lStanding == nil {
-		lStanding = &models.Standing{PlayerID: loserID, SeasonID: seasonID}
-	}
-
-	wGames := wStanding.Wins + wStanding.Losses
-	lGames := lStanding.Wins + lStanding.Losses
-
-	winnerNew := elo.NewRating(winner.Rating, loser.Rating, true, wGames, wStanding.Wins)
-	loserNew := elo.NewRating(loser.Rating, winner.Rating, false, lGames, lStanding.Wins)
-
-	winnerChange := winnerNew - winner.Rating
-	loserChange := loserNew - loser.Rating
-
-	match := &models.Match{
-		WinnerID:           winnerID,
-		LoserID:            loserID,
-		SeasonID:           seasonID,
-		Score:              score,
-		WinnerRatingChange: winnerChange,
-		LoserRatingChange:  loserChange,
-		PlayedAt:           time.Now(),
-	}
-
-	if err := matchRepoTx.Create(match); err != nil {
-		tx.Rollback()
-		return nil, err
-	}
-
-	winner.Rating = winnerNew
-	loser.Rating = loserNew
-
-	if err := tx.Save(&winner).Error; err != nil {
-		tx.Rollback()
-		return nil, err
-	}
-	if err := tx.Save(&loser).Error; err != nil {
-		tx.Rollback()
-		return nil, err
-	}
-
-	wStanding.Wins += 1
-	wStanding.Points += 1
-
-	lStanding.Losses += 1
-
-	if err := standingRepoTx.CreateOrUpdate(wStanding); err != nil {
-		tx.Rollback()
-		return nil, err
-	}
-	if err := standingRepoTx.CreateOrUpdate(lStanding); err != nil {
-		tx.Rollback()
-		return nil, err
-	}
-
-	if err := tx.Commit().Error; err != nil {
-		tx.Rollback()
-		return nil, err
-	}
-
-	return match, nil
+	return created, nil
 }
 
 func (s *matchService) GetFiltered(filter *models.MatchFilter) ([]models.Match, error) {
