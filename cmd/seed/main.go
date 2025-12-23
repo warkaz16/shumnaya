@@ -1,4 +1,4 @@
-// разделение файла на части с помошью камментов это инициатива вахи а не gpt
+// разделение файла на части с помощью комментариев — инициатива Вахи
 package main
 
 import (
@@ -17,10 +17,10 @@ import (
 )
 
 const (
-	batchSize    = 1000
-	playersCount = 150000
-	seasonsCount = 20
-	matchesCount = 300000
+	batchSize    = 10
+	playersCount = 15
+	seasonsCount = 3
+	matchesCount = 5
 )
 
 func main() {
@@ -50,13 +50,12 @@ func main() {
 		log.Fatal("Ошибка подключения к БД:", err)
 	}
 
-	// CLEAR DB
-fmt.Println("Очистка базы данных...")
+	// CLEAR DB (Postgres-safe)
+	fmt.Println("Очистка базы данных...")
 
-truncateSQL := `
+	truncateSQL := `
 DO $$
-DECLARE
-	r RECORD;
+DECLARE r RECORD;
 BEGIN
 	FOR r IN (
 		SELECT tablename
@@ -68,13 +67,11 @@ BEGIN
 	END LOOP;
 END $$;
 `
+	if err := db.Exec(truncateSQL).Error; err != nil {
+		log.Fatal("Ошибка очистки базы:", err)
+	}
 
-if err := db.Exec(truncateSQL).Error; err != nil {
-	log.Fatal("Ошибка очистки базы:", err)
-}
-
-fmt.Println("База данных очищена ✓")
-
+	fmt.Println("База данных очищена ✓")
 
 	gofakeit.Seed(0)
 
@@ -86,7 +83,8 @@ fmt.Println("База данных очищена ✓")
 	fmt.Println("\n=== SEED COMPLETED SUCCESSFULLY ===")
 }
 
-// PLAYERS
+// ================= PLAYERS =================
+
 func seedPlayers(db *gorm.DB) []uint {
 	players := make([]models.Player, 0, batchSize)
 	ids := make([]uint, 0, playersCount)
@@ -96,16 +94,9 @@ func seedPlayers(db *gorm.DB) []uint {
 	for i := 0; i < playersCount; i++ {
 		p := models.Player{
 			Name:         gofakeit.Name(),
-			Email:        fmt.Sprintf("player_%06d@test.com", i),
+			Email:        fmt.Sprintf("player_%02d@test.com", i),
 			PasswordHash: gofakeit.UUID(),
 			Rating:       gofakeit.Number(800, 2400),
-		}
-
-		if gofakeit.Number(1, 100) <= 5 {
-			p.DeletedAt = gorm.DeletedAt{
-				Time:  gofakeit.DateRange(time.Now().AddDate(-2, 0, 0), time.Now()),
-				Valid: true,
-			}
 		}
 
 		players = append(players, p)
@@ -131,7 +122,8 @@ func seedPlayers(db *gorm.DB) []uint {
 	return ids
 }
 
-// SEASONS
+// ================= SEASONS =================
+
 func seedSeasons(db *gorm.DB) []uint {
 	seasons := make([]models.Season, 0, seasonsCount)
 	ids := make([]uint, 0, seasonsCount)
@@ -158,18 +150,20 @@ func seedSeasons(db *gorm.DB) []uint {
 	return ids
 }
 
-//MATCHES
+// ================= MATCHES =================
 
 func seedMatches(db *gorm.DB, players, seasons []uint) {
 	matches := make([]models.Match, 0, batchSize)
 	fmt.Printf("Seeding matches... 0/%d", matchesCount)
 
 	for i := 0; i < matchesCount; i++ {
-		w := players[gofakeit.Number(0, len(players)-1)]
-		l := players[gofakeit.Number(0, len(players)-1)]
-		if w == l {
-			i--
-			continue
+		var w, l uint
+		for {
+			w = players[gofakeit.Number(0, len(players)-1)]
+			l = players[gofakeit.Number(0, len(players)-1)]
+			if w != l {
+				break
+			}
 		}
 
 		season := seasons[gofakeit.Number(0, len(seasons)-1)]
@@ -178,8 +172,8 @@ func seedMatches(db *gorm.DB, players, seasons []uint) {
 			WinnerID: w,
 			LoserID:  l,
 			SeasonID: season,
-			Score:    fmt.Sprintf("%d:%d", gofakeit.Number(11, 21), gofakeit.Number(0, 19)),
-			PlayedAt: gofakeit.DateRange(time.Now().AddDate(-3, 0, 0), time.Now()),
+			Score:    "3:1",
+			PlayedAt: gofakeit.DateRange(time.Now().AddDate(-1, 0, 0), time.Now()),
 		})
 
 		if len(matches) >= batchSize {
@@ -196,21 +190,22 @@ func seedMatches(db *gorm.DB, players, seasons []uint) {
 	fmt.Println(" ✓")
 }
 
-// STANDINGS
+// ================= STANDINGS =================
+
 func seedStandings(db *gorm.DB, players, seasons []uint) {
 	fmt.Println("Seeding standings...")
 
-	for _, season := range seasons {
-		standings := make([]models.Standing, 0, batchSize)
+	standings := make([]models.Standing, 0, batchSize)
 
+	for _, season := range seasons {
 		for _, player := range players {
 			standings = append(standings, models.Standing{
 				PlayerID: player,
 				SeasonID: season,
-				Wins:     gofakeit.Number(0, 50),
-				Losses:   gofakeit.Number(0, 50),
-				Points:   gofakeit.Number(0, 150),
-				Rank:     gofakeit.Number(1, 1000),
+				Wins:     gofakeit.Number(0, 5),
+				Losses:   gofakeit.Number(0, 5),
+				Points:   gofakeit.Number(0, 15),
+				Rank:     gofakeit.Number(1, playersCount),
 			})
 
 			if len(standings) >= batchSize {
@@ -218,10 +213,10 @@ func seedStandings(db *gorm.DB, players, seasons []uint) {
 				standings = standings[:0]
 			}
 		}
+	}
 
-		if len(standings) > 0 {
-			db.Session(&gorm.Session{SkipHooks: true}).Create(&standings)
-		}
+	if len(standings) > 0 {
+		db.Session(&gorm.Session{SkipHooks: true}).Create(&standings)
 	}
 
 	fmt.Println("Standings ✓")
