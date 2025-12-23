@@ -73,7 +73,7 @@ func (h *matchHandler) GetMatches(c *gin.Context) {
 			h.logger.Info("фильтр по конечной дате", "to", toTime)
 		} else {
 			h.logger.Warn("некорректный параметр to", "значение", toStr, "ошибка", err)
-			c.JSON(http.StatusBadRequest, gin.H{"error": "некорректный формат даты to, используйте ДД.МММ.ГГ (например: 25.12.24)"})
+			c.JSON(http.StatusBadRequest, gin.H{"error": "некорректный формат даты to, используйте ДД.ММ.ГГ (например: 25.12.24)"})
 			return
 		}
 	}
