@@ -1,3 +1,14 @@
+// @title Mini Tennis API
+// @version 1.0
+// @description API для мини-тенниса
+// @termsOfService http://example.com/terms/
+
+// @contact.name Adam
+// @contact.email adam@example.com
+
+// @host localhost:8080
+// @BasePath /
+
 package main
 
 import (
@@ -11,6 +22,11 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
+
+	_ "shumnaya/docs"
+
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 func main() {
@@ -48,6 +64,8 @@ func main() {
 	)
 
 	logger.Info("Server running on :8080")
+
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
 	if err := r.Run(); err != nil {
 		logger.Error("ошибка запуска сервера", "error", err)

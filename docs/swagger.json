@@ -1,0 +1,601 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "API для мини-тенниса",
+        "title": "Mini Tennis API",
+        "termsOfService": "http://example.com/terms/",
+        "contact": {
+            "name": "Adam",
+            "email": "adam@example.com"
+        },
+        "version": "1.0"
+    },
+    "host": "localhost:8080",
+    "basePath": "/",
+    "paths": {
+        "/matches": {
+            "get": {
+                "description": "Получить список матчей с фильтрами",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Matches"
+                ],
+                "summary": "Список матчей",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID сезона",
+                        "name": "season_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "ID игрока",
+                        "name": "player_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "example": "25.12.24",
+                        "description": "Дата начала (ДД.ММ.ГГ)",
+                        "name": "from",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "example": "31.12.24",
+                        "description": "Дата конца (ДД.ММ.ГГ)",
+                        "name": "to",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": true
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Записать результат матча",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Matches"
+                ],
+                "summary": "Создать матч",
+                "parameters": [
+                    {
+                        "description": "Параметры матча",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.CreateMatchRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/models.Match"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/players/{id}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Players"
+                ],
+                "summary": "Профиль игрока",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID игрока",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.PlayerProfile"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/seasons": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Seasons"
+                ],
+                "summary": "Все сезоны",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Season"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Seasons"
+                ],
+                "summary": "Создать сезон",
+                "parameters": [
+                    {
+                        "description": "Сезон",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/models.Season"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/models.Season"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/seasons/{id}": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Seasons"
+                ],
+                "summary": "Сезон по ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID сезона",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Season"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/seasons/{id}/standings": {
+            "get": {
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Seasons"
+                ],
+                "summary": "Таблица сезона",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "ID сезона",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/models.Standing"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "gorm.DeletedAt": {
+            "type": "object",
+            "properties": {
+                "time": {
+                    "type": "string"
+                },
+                "valid": {
+                    "description": "Valid is true if Time is not NULL",
+                    "type": "boolean"
+                }
+            }
+        },
+        "models.CreateMatchRequest": {
+            "type": "object",
+            "required": [
+                "loser_id",
+                "score",
+                "season_id",
+                "winner_id"
+            ],
+            "properties": {
+                "loser_id": {
+                    "type": "integer"
+                },
+                "score": {
+                    "type": "string"
+                },
+                "season_id": {
+                    "type": "integer"
+                },
+                "winner_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "models.Match": {
+            "type": "object",
+            "required": [
+                "loser_id",
+                "score",
+                "season_id",
+                "winner_id"
+            ],
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "$ref": "#/definitions/gorm.DeletedAt"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "loser": {
+                    "$ref": "#/definitions/models.Player"
+                },
+                "loser_id": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "loser_rating_change": {
+                    "type": "integer"
+                },
+                "played_at": {
+                    "type": "string"
+                },
+                "score": {
+                    "type": "string"
+                },
+                "season": {
+                    "$ref": "#/definitions/models.Season"
+                },
+                "season_id": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "winner": {
+                    "$ref": "#/definitions/models.Player"
+                },
+                "winner_id": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "winner_rating_change": {
+                    "type": "integer"
+                }
+            }
+        },
+        "models.Player": {
+            "type": "object",
+            "required": [
+                "email",
+                "name"
+            ],
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "$ref": "#/definitions/gorm.DeletedAt"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "matches": {
+                    "description": "история матчей по игроку (поле для удобства, запросы через репозиторий)",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Match"
+                    }
+                },
+                "name": {
+                    "type": "string"
+                },
+                "password_hash": {
+                    "type": "string"
+                },
+                "rating": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.PlayerProfile": {
+            "type": "object",
+            "properties": {
+                "losses": {
+                    "type": "integer"
+                },
+                "player": {
+                    "$ref": "#/definitions/models.Player"
+                },
+                "rating": {
+                    "type": "integer"
+                },
+                "recent_matches": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Match"
+                    }
+                },
+                "total_matches": {
+                    "type": "integer"
+                },
+                "wins": {
+                    "type": "integer"
+                }
+            }
+        },
+        "models.Season": {
+            "type": "object",
+            "required": [
+                "end_date",
+                "name",
+                "start_date"
+            ],
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "$ref": "#/definitions/gorm.DeletedAt"
+                },
+                "end_date": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "is_active": {
+                    "type": "boolean"
+                },
+                "matches": {
+                    "description": "получение матчей по сезонам",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/models.Match"
+                    }
+                },
+                "name": {
+                    "type": "string"
+                },
+                "start_date": {
+                    "type": "string"
+                },
+                "updatedAt": {
+                    "type": "string"
+                }
+            }
+        },
+        "models.Standing": {
+            "type": "object",
+            "required": [
+                "player_id",
+                "season_id"
+            ],
+            "properties": {
+                "createdAt": {
+                    "type": "string"
+                },
+                "deletedAt": {
+                    "$ref": "#/definitions/gorm.DeletedAt"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "losses": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "player": {
+                    "$ref": "#/definitions/models.Player"
+                },
+                "player_id": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "points": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "rank": {
+                    "type": "integer",
+                    "minimum": 0
+                },
+                "season": {
+                    "$ref": "#/definitions/models.Season"
+                },
+                "season_id": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "updatedAt": {
+                    "type": "string"
+                },
+                "wins": {
+                    "type": "integer",
+                    "minimum": 0
+                }
+            }
+        }
+    }
+}
