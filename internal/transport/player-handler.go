@@ -23,6 +23,15 @@ func (h *PlayerHandler) RegisterRoutes(r *gin.Engine) {
 	r.GET("/players/:id", h.GetByID)
 }
 
+// GetByID godoc
+// @Summary Профиль игрока
+// @Tags Players
+// @Produce json
+// @Param id path int true "ID игрока"
+// @Success 200 {object} models.PlayerProfile
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /players/{id} [get]
 func (h *PlayerHandler) GetByID(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)

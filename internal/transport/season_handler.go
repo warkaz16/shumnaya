@@ -38,6 +38,13 @@ func (h *SeasonHandler) RegisterRoutes(r *gin.Engine) {
 	r.GET("/seasons/:id/standings", h.getByIDstandings)
 }
 
+// getAll godoc
+// @Summary Все сезоны
+// @Tags Seasons
+// @Produce json
+// @Success 200 {array} models.Season
+// @Failure 500 {object} map[string]string
+// @Router /seasons [get]
 func (h *SeasonHandler) getAll(c *gin.Context) {
 	seasons, err := h.service.GetAllSeasons()
 	if err != nil {
@@ -49,6 +56,15 @@ func (h *SeasonHandler) getAll(c *gin.Context) {
 	c.JSON(http.StatusOK, seasons)
 }
 
+// getByID godoc
+// @Summary Сезон по ID
+// @Tags Seasons
+// @Produce json
+// @Param id path int true "ID сезона"
+// @Success 200 {object} models.Season
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Router /seasons/{id} [get]
 func (h *SeasonHandler) getByID(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil || id <= 0 {
@@ -67,6 +83,15 @@ func (h *SeasonHandler) getByID(c *gin.Context) {
 	c.JSON(http.StatusOK, season)
 }
 
+// create godoc
+// @Summary Создать сезон
+// @Tags Seasons
+// @Accept json
+// @Produce json
+// @Param input body models.Season true "Сезон"
+// @Success 201 {object} models.Season
+// @Failure 400 {object} map[string]string
+// @Router /seasons [post]
 func (h *SeasonHandler) create(c *gin.Context) {
 	var season models.Season
 
@@ -85,6 +110,15 @@ func (h *SeasonHandler) create(c *gin.Context) {
 	c.JSON(http.StatusCreated, season)
 }
 
+// getByIDstandings godoc
+// @Summary Таблица сезона
+// @Tags Seasons
+// @Produce json
+// @Param id path int true "ID сезона"
+// @Success 200 {array} models.Standing
+// @Failure 400 {object} map[string]string
+// @Failure 404 {object} map[string]string
+// @Router /seasons/{id}/standings [get]
 func (h *SeasonHandler) getByIDstandings(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil || id <= 0 {

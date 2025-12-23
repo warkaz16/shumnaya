@@ -21,3 +21,6 @@ dev:
 
 build:
 	go build -o shumnaya cmd/shumnaya/main.go
+
+swagger:
+	cd cmd/shumnaya && swag init -g main.go -o ../../docs -d .,../../internal --parseDependency --parseInternal

@@ -1,0 +1,403 @@
+basePath: /
+definitions:
+  gorm.DeletedAt:
+    properties:
+      time:
+        type: string
+      valid:
+        description: Valid is true if Time is not NULL
+        type: boolean
+    type: object
+  models.CreateMatchRequest:
+    properties:
+      loser_id:
+        type: integer
+      score:
+        type: string
+      season_id:
+        type: integer
+      winner_id:
+        type: integer
+    required:
+    - loser_id
+    - score
+    - season_id
+    - winner_id
+    type: object
+  models.Match:
+    properties:
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      id:
+        type: integer
+      loser:
+        $ref: '#/definitions/models.Player'
+      loser_id:
+        minimum: 1
+        type: integer
+      loser_rating_change:
+        type: integer
+      played_at:
+        type: string
+      score:
+        type: string
+      season:
+        $ref: '#/definitions/models.Season'
+      season_id:
+        minimum: 1
+        type: integer
+      updatedAt:
+        type: string
+      winner:
+        $ref: '#/definitions/models.Player'
+      winner_id:
+        minimum: 1
+        type: integer
+      winner_rating_change:
+        type: integer
+    required:
+    - loser_id
+    - score
+    - season_id
+    - winner_id
+    type: object
+  models.Player:
+    properties:
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      email:
+        type: string
+      id:
+        type: integer
+      matches:
+        description: история матчей по игроку (поле для удобства, запросы через репозиторий)
+        items:
+          $ref: '#/definitions/models.Match'
+        type: array
+      name:
+        type: string
+      password_hash:
+        type: string
+      rating:
+        minimum: 0
+        type: integer
+      updatedAt:
+        type: string
+    required:
+    - email
+    - name
+    type: object
+  models.PlayerProfile:
+    properties:
+      losses:
+        type: integer
+      player:
+        $ref: '#/definitions/models.Player'
+      rating:
+        type: integer
+      recent_matches:
+        items:
+          $ref: '#/definitions/models.Match'
+        type: array
+      total_matches:
+        type: integer
+      wins:
+        type: integer
+    type: object
+  models.Season:
+    properties:
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      end_date:
+        type: string
+      id:
+        type: integer
+      is_active:
+        type: boolean
+      matches:
+        description: получение матчей по сезонам
+        items:
+          $ref: '#/definitions/models.Match'
+        type: array
+      name:
+        type: string
+      start_date:
+        type: string
+      updatedAt:
+        type: string
+    required:
+    - end_date
+    - name
+    - start_date
+    type: object
+  models.Standing:
+    properties:
+      createdAt:
+        type: string
+      deletedAt:
+        $ref: '#/definitions/gorm.DeletedAt'
+      id:
+        type: integer
+      losses:
+        minimum: 0
+        type: integer
+      player:
+        $ref: '#/definitions/models.Player'
+      player_id:
+        minimum: 1
+        type: integer
+      points:
+        minimum: 0
+        type: integer
+      rank:
+        minimum: 0
+        type: integer
+      season:
+        $ref: '#/definitions/models.Season'
+      season_id:
+        minimum: 1
+        type: integer
+      updatedAt:
+        type: string
+      wins:
+        minimum: 0
+        type: integer
+    required:
+    - player_id
+    - season_id
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: adam@example.com
+    name: Adam
+  description: API для мини-тенниса
+  termsOfService: http://example.com/terms/
+  title: Mini Tennis API
+  version: "1.0"
+paths:
+  /matches:
+    get:
+      consumes:
+      - application/json
+      description: Получить список матчей с фильтрами
+      parameters:
+      - description: ID сезона
+        in: query
+        name: season_id
+        type: integer
+      - description: ID игрока
+        in: query
+        name: player_id
+        type: integer
+      - description: Дата начала (ДД.ММ.ГГ)
+        example: 25.12.24
+        in: query
+        name: from
+        type: string
+      - description: Дата конца (ДД.ММ.ГГ)
+        example: 31.12.24
+        in: query
+        name: to
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Список матчей
+      tags:
+      - Matches
+    post:
+      consumes:
+      - application/json
+      description: Записать результат матча
+      parameters:
+      - description: Параметры матча
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateMatchRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Match'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Создать матч
+      tags:
+      - Matches
+  /players/{id}:
+    get:
+      parameters:
+      - description: ID игрока
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.PlayerProfile'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Профиль игрока
+      tags:
+      - Players
+  /seasons:
+    get:
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Season'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Все сезоны
+      tags:
+      - Seasons
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Сезон
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/models.Season'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Season'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Создать сезон
+      tags:
+      - Seasons
+  /seasons/{id}:
+    get:
+      parameters:
+      - description: ID сезона
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Season'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Сезон по ID
+      tags:
+      - Seasons
+  /seasons/{id}/standings:
+    get:
+      parameters:
+      - description: ID сезона
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Standing'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Таблица сезона
+      tags:
+      - Seasons
+swagger: "2.0"
