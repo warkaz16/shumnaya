@@ -26,6 +26,20 @@ func (h *MatchHandler) RegisterRoutes(r *gin.Engine) {
 	r.POST("/matches", h.CreateMatch)
 }
 
+// GetMatches godoc
+// @Summary Список матчей
+// @Description Получить список матчей с фильтрами
+// @Tags Matches
+// @Accept json
+// @Produce json
+// @Param season_id query int false "ID сезона"
+// @Param player_id query int false "ID игрока"
+// @Param from query string false "Дата начала (ДД.ММ.ГГ)" example(25.12.24)
+// @Param to query string false "Дата конца (ДД.ММ.ГГ)" example(31.12.24)
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /matches [get]
 func (h *MatchHandler) GetMatches(c *gin.Context) {
 	filter := &models.MatchFilter{}
 
@@ -90,6 +104,17 @@ func (h *MatchHandler) GetMatches(c *gin.Context) {
 	})
 }
 
+// CreateMatch godoc
+// @Summary Создать матч
+// @Description Записать результат матча
+// @Tags Matches
+// @Accept json
+// @Produce json
+// @Param input body models.CreateMatchRequest true "Параметры матча"
+// @Success 201 {object} models.Match
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /matches [post]
 func (h *MatchHandler) CreateMatch(c *gin.Context) {
 	var req models.CreateMatchRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
