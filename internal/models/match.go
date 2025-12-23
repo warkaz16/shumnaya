@@ -31,3 +31,10 @@ type MatchFilter struct {
 	FromDate *time.Time
 	ToDate   *time.Time
 }
+
+type CreateMatchRequest struct {
+	WinnerID uint   `json:"winner_id" binding:"required"`
+	LoserID  uint   `json:"loser_id" binding:"required"`
+	SeasonID uint   `json:"season_id" binding:"required"`
+	Score    string `json:"score" binding:"required"`
+}
