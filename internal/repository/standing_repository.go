@@ -10,6 +10,7 @@ import (
 )
 
 type StandingRepository interface {
+	WithDB(tx *gorm.DB) StandingRepository
 	Create(standing *models.Standing) error
 	Update(standing *models.Standing) error
 
@@ -28,6 +29,10 @@ type standingRepository struct {
 
 func NewStandingRepository(db *gorm.DB, logger *slog.Logger) StandingRepository {
 	return &standingRepository{db: db, logger: logger}
+}
+
+func (r *standingRepository) WithDB(tx *gorm.DB) StandingRepository {
+	return &standingRepository{db: tx, logger: r.logger}
 }
 
 func (r *standingRepository) Create(standing *models.Standing) error {

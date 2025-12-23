@@ -8,6 +8,7 @@ import (
 )
 
 type MatchRepository interface {
+	WithDB(tx *gorm.DB) MatchRepository
 	Create(match *models.Match) error
 
 	Get() ([]models.Match, error)
@@ -27,6 +28,10 @@ type matchRepository struct {
 
 func NewMatchRepository(db *gorm.DB, log *slog.Logger) MatchRepository {
 	return &matchRepository{db: db, log: log}
+}
+
+func (r *matchRepository) WithDB(tx *gorm.DB) MatchRepository {
+	return &matchRepository{db: tx, log: r.log}
 }
 
 func (r *matchRepository) GetFiltered(filter *models.MatchFilter) ([]models.Match, error) {

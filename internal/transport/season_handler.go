@@ -9,6 +9,7 @@ import (
 	"shumnaya/internal/service"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 type SeasonHandler struct {
@@ -59,8 +60,13 @@ func (h *SeasonHandler) getByID(c *gin.Context) {
 
 	season, err := h.service.GetSeasonByID(uint(id))
 	if err != nil {
-		h.logger.Error("handler: сезон не найден", "season_id", id, "error", err)
-		c.JSON(http.StatusNotFound, gin.H{"error": "сезон не найден"})
+		if err == gorm.ErrRecordNotFound {
+			h.logger.Warn("handler: сезон не найден", "season_id", id)
+			c.JSON(http.StatusNotFound, gin.H{"error": "сезон не найден"})
+		} else {
+			h.logger.Error("handler: ошибка получения сезона", "season_id", id, "error", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "не удалось получить сезон"})
+		}
 		return
 	}
 
@@ -95,18 +101,21 @@ func (h *SeasonHandler) getByIDstandings(c *gin.Context) {
 
 	season, err := h.service.GetSeasonByID(uint(id))
 	if err != nil {
-		h.logger.Error("handler: сезон не найден", "season_id", id, "error", err)
-		c.JSON(http.StatusNotFound, gin.H{"error": "сезон не найден"})
+		if err == gorm.ErrRecordNotFound {
+			h.logger.Warn("handler: сезон не найден", "season_id", id)
+			c.JSON(http.StatusNotFound, gin.H{"error": "сезон не найден"})
+		} else {
+			h.logger.Error("handler: ошибка получения сезона", "season_id", id, "error", err)
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "не удалось получить сезон"})
+		}
 		return
 	}
 
 	standing, err := h.standing.GetSeasonStandings(season.ID)
 
 	if err != nil {
-		h.logger.Error("Ошибка при поиске standing")
-		c.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
-		})
+		h.logger.Error("handler: ошибка при получении standings", "season_id", season.ID, "error", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "не удалось получить таблицу сезона"})
 		return
 	}
 
