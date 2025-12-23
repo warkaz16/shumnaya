@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strconv"
 
+	"shumnaya/internal/dto"
 	"shumnaya/internal/service"
 
 	"github.com/gin-gonic/gin"
@@ -52,16 +53,6 @@ func (h *PlayerHandler) GetByID(c *gin.Context) {
 	c.JSON(http.StatusOK, profile)
 }
 
-type RegisterPlayerRequest struct {
-	Name     string `json:"name" binding:"required" example:"Иван"`
-	Email    string `json:"email" binding:"required,email" example:"test@mail.com"`
-	Password string `json:"password" binding:"required,min=6" example:"secret123"`
-}
-
-type RegisterPlayerResponse struct {
-	Message string `json:"message" example:"игрок успешно зарегистрирован"`
-}
-
 // Register godoc
 // @Summary Регистрация игрока
 // @Description Создает нового игрока
@@ -73,7 +64,7 @@ type RegisterPlayerResponse struct {
 // @Failure 400 {object} map[string]string
 // @Router /players [post]
 func (h *PlayerHandler) Register(c *gin.Context) {
-	var req RegisterPlayerRequest
+	var req dto.RegisterPlayerRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(400, gin.H{
