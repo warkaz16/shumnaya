@@ -17,11 +17,10 @@ type matchHandler struct {
 	logger  *slog.Logger
 }
 
-func NewMatchHandler(service service.MatchService, logger *slog.Logger) *matchHandler {
-	return &matchHandler{
-		service: service,
-		logger:  logger,
-	}
+func NewMatchHandler(r *gin.Engine, service service.MatchService, logger *slog.Logger) {
+	h := &matchHandler{service: service, logger: logger}
+	r.GET("/matches", h.GetMatches)
+	r.POST("/matches", h.CreateMatch)
 }
 
 func (h *matchHandler) GetMatches(c *gin.Context) {
