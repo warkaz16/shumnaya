@@ -24,12 +24,11 @@ type Match struct {
 	PlayedAt           time.Time `json:"played_at" gorm:"column:played_at"`
 }
 
-
 type MatchFilter struct {
-	SeasonID *uint
-	PlayerID *uint
-	FromDate *time.Time
-	ToDate   *time.Time
+	SeasonID *uint      `json:"season_id"`
+	PlayerID *uint      `json:"player_id"`
+	FromDate *time.Time `json:"from_date"`
+	ToDate   *time.Time `json:"to_date"`
 }
 
 type CreateMatchRequest struct {
