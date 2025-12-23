@@ -149,7 +149,7 @@ func (s *matchService) Get() ([]models.Match, error) {
 
 	// Валидация результата
 	if matches == nil {
-		return []models.Match{}, errors.New("матчей нет")
+		return []models.Match{}, nil
 	}
 
 	s.logger.Info("матчи успешно получены", "количество", len(matches))

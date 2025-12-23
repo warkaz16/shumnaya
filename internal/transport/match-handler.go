@@ -60,7 +60,7 @@ func (h *MatchHandler) GetMatches(c *gin.Context) {
 			h.logger.Info("фильтр по начальной дате", "from", fromTime)
 		} else {
 			h.logger.Warn("некорректный параметр from", "значение", fromStr, "ошибка", err)
-			c.JSON(http.StatusBadRequest, gin.H{"error": "некорректный формат даты from, используйте ДД.МММ.ГГ (например: 25.12.24)"})
+			c.JSON(http.StatusBadRequest, gin.H{"error": "некорректный формат даты from, используйте ДД.ММ.ГГ (например: 25.12.24)"})
 			return
 		}
 	}
@@ -110,5 +110,5 @@ func (h *MatchHandler) CreateMatch(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"data": match})
+	c.JSON(http.StatusCreated, match)
 }
