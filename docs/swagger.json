@@ -133,6 +133,49 @@
                 }
             }
         },
+        "/players": {
+            "post": {
+                "description": "Создает нового игрока",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Players"
+                ],
+                "summary": "Регистрация игрока",
+                "parameters": [
+                    {
+                        "description": "Данные регистрации",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/transport.RegisterPlayerRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/transport.RegisterPlayerResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "object",
+                            "additionalProperties": {
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/players/{id}": {
             "get": {
                 "produces": [
@@ -594,6 +637,38 @@
                 "wins": {
                     "type": "integer",
                     "minimum": 0
+                }
+            }
+        },
+        "transport.RegisterPlayerRequest": {
+            "type": "object",
+            "required": [
+                "email",
+                "name",
+                "password"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "example": "test@mail.com"
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Иван"
+                },
+                "password": {
+                    "type": "string",
+                    "minLength": 6,
+                    "example": "secret123"
+                }
+            }
+        },
+        "transport.RegisterPlayerResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string",
+                    "example": "игрок успешно зарегистрирован"
                 }
             }
         }

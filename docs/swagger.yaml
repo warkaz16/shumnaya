@@ -172,6 +172,29 @@ definitions:
     - player_id
     - season_id
     type: object
+  transport.RegisterPlayerRequest:
+    properties:
+      email:
+        example: test@mail.com
+        type: string
+      name:
+        example: Иван
+        type: string
+      password:
+        example: secret123
+        minLength: 6
+        type: string
+    required:
+    - email
+    - name
+    - password
+    type: object
+  transport.RegisterPlayerResponse:
+    properties:
+      message:
+        example: игрок успешно зарегистрирован
+        type: string
+    type: object
 host: localhost:8080
 info:
   contact:
@@ -262,6 +285,34 @@ paths:
       summary: Создать матч
       tags:
       - Matches
+  /players:
+    post:
+      consumes:
+      - application/json
+      description: Создает нового игрока
+      parameters:
+      - description: Данные регистрации
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/transport.RegisterPlayerRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/transport.RegisterPlayerResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Регистрация игрока
+      tags:
+      - Players
   /players/{id}:
     get:
       parameters:
