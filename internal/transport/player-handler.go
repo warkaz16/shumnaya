@@ -16,7 +16,7 @@ type PlayerHandler struct {
 	logger  *slog.Logger
 }
 
-func NewPlayerHandler( svc service.PlayerService, logger *slog.Logger) *PlayerHandler {
+func NewPlayerHandler(r *gin.Engine, svc service.PlayerService, logger *slog.Logger) *PlayerHandler {
 	return &PlayerHandler{service: svc, logger: logger}
 }
 
