@@ -25,7 +25,15 @@ func (h *PlayerHandler) RegisterRoutes(r *gin.Engine) {
 	r.POST("/players", h.Register)
 }
 
-
+// GetByID godoc
+// @Summary Профиль игрока
+// @Tags Players
+// @Produce json
+// @Param id path int true "ID игрока"
+// @Success 200 {object} models.PlayerProfile
+// @Failure 400 {object} map[string]string
+// @Failure 500 {object} map[string]string
+// @Router /players/{id} [get]
 func (h *PlayerHandler) GetByID(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)
@@ -45,7 +53,16 @@ func (h *PlayerHandler) GetByID(c *gin.Context) {
 	c.JSON(http.StatusOK, profile)
 }
 
-
+// Register godoc
+// @Summary Регистрация игрока
+// @Description Создает нового игрока
+// @Tags Players
+// @Accept json
+// @Produce json
+// @Param input body RegisterPlayerRequest true "Данные регистрации"
+// @Success 201 {object} RegisterPlayerResponse
+// @Failure 400 {object} map[string]string
+// @Router /players [post]
 func (h *PlayerHandler) Register(c *gin.Context) {
 	var req dto.RegisterPlayerRequest
 
