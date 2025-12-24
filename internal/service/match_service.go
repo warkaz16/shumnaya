@@ -163,22 +163,15 @@ func (s *matchService) GetHeadToHead(playerAID, playerBID uint, limit int) (*mod
 	record.PlayerAID = playerAID
 	record.PlayerBID = playerBID
 
-	totalMatches, err := s.matchRepo.HeadToHeadRecordMatchesCount(playerAID, playerBID)
+	totalMatches, playerAWins, playerBWins, err := s.matchRepo.HeadToHeadRecordMatchesCount(playerAID, playerBID)
 	if err != nil {
 		return nil, err
 	}
+	
 	record.TotalMatches = int(totalMatches)
-
-	playerAWins, err := s.matchRepo.HeadToHeadWinsCount(playerAID, playerBID)
-	if err != nil {
-		return nil, err
-	}
+	
 	record.PlayerAWins = int(playerAWins)
-
-	playerBWins, err := s.matchRepo.HeadToHeadWinsCount(playerBID, playerAID)
-	if err != nil {
-		return nil, err
-	}
+	
 	record.PlayerBWins = int(playerBWins)
 
 	if limit <= 0 && limit > (int(totalMatches)) {

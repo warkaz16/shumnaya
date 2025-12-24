@@ -7,16 +7,16 @@ import (
 )
 
 type Match struct {
-	gorm.Model
+	gorm.Model `json:"-"`
 
 	WinnerID uint   `json:"winner_id" gorm:"column:winner_id" binding:"required,min=1"`
-	Winner   Player `json:"winner" gorm:"foreignKey:WinnerID;references:ID"`
+	Winner   Player `json:"-" gorm:"foreignKey:WinnerID;references:ID"`
 
 	LoserID uint   `json:"loser_id" gorm:"column:loser_id" binding:"required,min=1"`
-	Loser   Player `json:"loser" gorm:"foreignKey:LoserID;references:ID"`
+	Loser   Player `json:"-" gorm:"foreignKey:LoserID;references:ID"`
 
 	SeasonID uint   `json:"season_id" gorm:"column:season_id" binding:"required,min=1"`
-	Season   Season `json:"season" gorm:"foreignKey:SeasonID;references:ID"`
+	Season   Season `json:"-" gorm:"foreignKey:SeasonID;references:ID"`
 
 	Score              string    `json:"score" gorm:"column:score" binding:"required"`
 	WinnerRatingChange int       `json:"winner_rating_change,omitempty" gorm:"column:winner_rating_change"`

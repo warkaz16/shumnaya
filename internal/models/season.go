@@ -7,7 +7,7 @@ import (
 )
 
 type Season struct {
-	gorm.Model
+	gorm.Model `json:"-"`
 	Name      string    `json:"name" gorm:"column:name;type:varchar(255)" binding:"required"`
 	StartDate time.Time `json:"start_date" gorm:"column:start_date" binding:"required"`
 	EndDate   time.Time `json:"end_date" gorm:"column:end_date" binding:"required"`

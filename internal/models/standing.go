@@ -3,7 +3,7 @@ package models
 import "gorm.io/gorm"
 
 type Standing struct {
-	gorm.Model
+	gorm.Model `json:"-"`
 
 	PlayerID uint   `json:"player_id" gorm:"column:player_id" binding:"required,min=1"`
 	Player   Player `json:"player,omitempty" gorm:"foreignKey:PlayerID;references:ID"`
