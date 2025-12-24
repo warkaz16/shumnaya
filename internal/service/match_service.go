@@ -44,6 +44,14 @@ func (s *matchService) RecordMatch(winnerID, loserID, seasonID uint, score strin
 		matchRepoTx := s.matchRepo.WithDB(tx)
 		standingRepoTx := s.standingRepo.WithDB(tx)
 
+		// Проверка существования сезона
+		if err := tx.First(&models.Season{}, seasonID).Error; err != nil {
+			if err == gorm.ErrRecordNotFound {
+				return errors.New("season not found")
+			}
+			return err
+		}
+
 		var winner models.Player
 		if err := tx.First(&winner, winnerID).Error; err != nil {
 			return err
@@ -172,6 +180,10 @@ func (s *matchService) GetHeadToHead(playerAID, playerBID uint, limit int) (*mod
 		return nil, err
 	}
 	record.PlayerBWins = int(playerBWins)
+
+	if limit <= 0 && limit > (int(totalMatches)) {
+		limit = 5
+	}
 
 	recentMatches, err := s.matchRepo.HeadToHeadRecentMatches(playerAID, playerBID, limit)
 	if err != nil {
