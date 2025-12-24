@@ -37,3 +37,12 @@ type CreateMatchRequest struct {
 	SeasonID uint   `json:"season_id" binding:"required"`
 	Score    string `json:"score" binding:"required"`
 }
+
+type HeadToHeadRecord struct {
+	PlayerAID         uint      `json:"player_a_id"`
+	PlayerBID         uint      `json:"player_b_id"`
+	PlayerAWins       int      `json:"player_a_wins"`
+	PlayerBWins       int      `json:"player_b_wins"`
+	TotalMatches      int      `json:"total_matches"`
+	LastMatchesPlayed []Match   `json:"last_matches_played"`
+}

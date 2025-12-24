@@ -17,6 +17,7 @@ type MatchService interface {
 
 	Get() ([]models.Match, error)
 	GetFiltered(filter *models.MatchFilter) ([]models.Match, error)
+	GetHeadToHead(playerAID, playerBID uint, limit int) (*models.HeadToHeadRecord, error)
 }
 
 type matchService struct {
@@ -146,4 +147,37 @@ func (s *matchService) Get() ([]models.Match, error) {
 
 	s.logger.Info("матчи успешно получены", "количество", len(matches))
 	return matches, nil
+}
+
+func (s *matchService) GetHeadToHead(playerAID, playerBID uint, limit int) (*models.HeadToHeadRecord, error) {
+	var record models.HeadToHeadRecord
+
+	record.PlayerAID = playerAID
+	record.PlayerBID = playerBID
+
+	totalMatches, err := s.matchRepo.HeadToHeadRecordMatchesCount(playerAID, playerBID)
+	if err != nil {
+		return nil, err
+	}
+	record.TotalMatches = int(totalMatches)
+
+	playerAWins, err := s.matchRepo.HeadToHeadWinsCount(playerAID, playerBID)
+	if err != nil {
+		return nil, err
+	}
+	record.PlayerAWins = int(playerAWins)
+
+	playerBWins, err := s.matchRepo.HeadToHeadWinsCount(playerBID, playerAID)
+	if err != nil {
+		return nil, err
+	}
+	record.PlayerBWins = int(playerBWins)
+
+	recentMatches, err := s.matchRepo.HeadToHeadRecentMatches(playerAID, playerBID, limit)
+	if err != nil {
+		return nil, err
+	}
+	record.LastMatchesPlayed = recentMatches
+
+	return &record, nil
 }

@@ -24,6 +24,7 @@ func NewMatchHandler(r *gin.Engine, service service.MatchService, logger *slog.L
 func (h *MatchHandler) RegisterRoutes(r *gin.Engine) {
 	r.GET("/matches", h.GetMatches)
 	r.POST("/matches", h.CreateMatch)
+	r.GET("/players/:id/vs/:opponentId/:limit", h.GetHeadToHead)
 }
 
 // GetMatches godoc
@@ -136,4 +137,40 @@ func (h *MatchHandler) CreateMatch(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, match)
+}
+
+func (h *MatchHandler) GetHeadToHead(c *gin.Context) {
+	playerIDStr := c.Param("id")
+	opponentIDStr := c.Param("opponentId")
+	limitStr := c.Param("limit")
+
+	limit, err := strconv.Atoi(limitStr)
+	if err != nil {
+		h.logger.Warn("invalid limit", "value", limitStr, "error", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid limit"})
+		return
+	}
+
+	playerID, err := strconv.ParseUint(playerIDStr, 10, 32)
+	if err != nil {
+		h.logger.Warn("invalid player ID", "value", playerIDStr, "error", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid player ID"})
+		return
+	}
+
+	opponentID, err := strconv.ParseUint(opponentIDStr, 10, 32)
+	if err != nil {
+		h.logger.Warn("invalid opponent ID", "value", opponentIDStr, "error", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid opponent ID"})
+		return
+	}
+
+	record, err := h.service.GetHeadToHead(uint(playerID), uint(opponentID), limit)
+	if err != nil {
+		h.logger.Error("failed to get head-to-head record", "error", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to get head-to-head record"})
+		return
+	}
+
+	c.JSON(http.StatusOK, record)
 }

@@ -19,6 +19,9 @@ type MatchRepository interface {
 	GetRecentByPlayerID(playerID uint, limit int) ([]models.Match, error)
 
 	GetFiltered(filter *models.MatchFilter) ([]models.Match, error)
+	HeadToHeadRecordMatchesCount(playerAID, playerBID uint) (int64, error)
+	HeadToHeadWinsCount(winnerID, loserID uint) (int64, error)
+	HeadToHeadRecentMatches(playerAID, playerBID uint, limit int) ([]models.Match, error)
 }
 
 type matchRepository struct {
@@ -106,5 +109,43 @@ func (r *matchRepository) GetRecentByPlayerID(playerID uint, limit int) ([]model
 		Find(&matches).Error; err != nil {
 		return nil, err
 	}
+	return matches, nil
+}
+
+func (r *matchRepository) HeadToHeadRecordMatchesCount(playerAID, playerBID uint) (int64, error) {
+	var count int64
+
+	if err := r.db.
+	Where("(winner_id = ? AND loser_id = ?) OR (winner_id = ? AND loser_id = ?)", playerAID, playerBID, playerBID, playerAID).
+	Count(&count).Error; err != nil {
+		r.log.Error("ошибка получения записи матча между игроками", "error", err)
+		return 0, err
+	}
+
+	return count, nil
+}
+
+func (r *matchRepository) HeadToHeadWinsCount(winnerID, loserID uint) (int64, error) {
+	var count int64
+
+	if err := r.db.
+		Where("winner_id = ? AND loser_id = ?", winnerID, loserID).
+		Count(&count).Error; err != nil {
+		r.log.Error("ошибка получения количества побед между игроками", "error", err)
+		return 0, err
+	}
+
+	return count, nil
+}
+
+func (r *matchRepository) HeadToHeadRecentMatches(playerAID, playerBID uint, limit int) ([]models.Match, error) {
+	var matches []models.Match
+	if err := r.db.
+		Where("(winner_id = ? AND loser_id = ?) OR (winner_id = ? AND loser_id = ?)", playerAID, playerBID, playerBID, playerAID).
+		Preload("Winner").Preload("Loser").Preload("Season").Order("played_at DESC").Limit(limit).Find(&matches).Error; err != nil {
+		r.log.Error("ошибка получения последних матчей между игроками", "error", err)
+		return nil, err
+	}
+
 	return matches, nil
 }
