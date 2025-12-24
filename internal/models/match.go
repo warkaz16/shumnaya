@@ -1,6 +1,7 @@
 package models
 
 import (
+	
 	"time"
 
 	"gorm.io/gorm"
@@ -24,13 +25,6 @@ type Match struct {
 	PlayedAt           time.Time `json:"played_at" gorm:"column:played_at"`
 }
 
-type MatchFilter struct {
-	SeasonID *uint      `json:"season_id"`
-	PlayerID *uint      `json:"player_id"`
-	FromDate *time.Time `json:"from_date"`
-	ToDate   *time.Time `json:"to_date"`
-}
-
 type CreateMatchRequest struct {
 	WinnerID uint   `json:"winner_id" binding:"required"`
 	LoserID  uint   `json:"loser_id" binding:"required"`
@@ -39,10 +33,31 @@ type CreateMatchRequest struct {
 }
 
 type HeadToHeadRecord struct {
-	PlayerAID         uint      `json:"player_a_id"`
-	PlayerBID         uint      `json:"player_b_id"`
-	PlayerAWins       int      `json:"player_a_wins"`
-	PlayerBWins       int      `json:"player_b_wins"`
-	TotalMatches      int      `json:"total_matches"`
-	LastMatchesPlayed []Match   `json:"last_matches_played"`
+	PlayerAID         uint    `json:"player_a_id"`
+	PlayerBID         uint    `json:"player_b_id"`
+	PlayerAWins       int     `json:"player_a_wins"`
+	PlayerBWins       int     `json:"player_b_wins"`
+	TotalMatches      int     `json:"total_matches"`
+	LastMatchesPlayed []Match `json:"last_matches_played"`
+}
+
+type MatchFilter struct {
+	SeasonID *uint      `json:"season_id"`
+	PlayerID *uint      `json:"player_id"`
+	FromDate *time.Time `json:"from_date"`
+	ToDate   *time.Time `json:"to_date"`
+	Page     *int       `json:"page"`      // Новое поле
+	PageSize *int       `json:"page_size"` // Новое поле
+}
+
+type PaginatedMatches struct {
+	Data       []Match `json:"data"`
+	Pagination Pagination     `json:"pagination"`
+}
+
+type Pagination struct {
+	Page     int   `json:"page"`
+	PageSize int   `json:"page_size"`
+	Total    int64 `json:"total"`
+	HasNext  bool  `json:"has_next"`
 }

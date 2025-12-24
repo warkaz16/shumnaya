@@ -18,7 +18,7 @@ type MatchRepository interface {
 	GetByPlayerID(playerID uint) ([]models.Match, error)
 	GetRecentByPlayerID(playerID uint, limit int) ([]models.Match, error)
 
-	GetFiltered(filter *models.MatchFilter) ([]models.Match, error)
+	GetFiltered(filter *models.MatchFilter) (*models.PaginatedMatches, error)
 	HeadToHeadRecordMatchesCount(playerAID, playerBID uint) (countA int64, countB int64, countC int64, err error)
 
 	HeadToHeadRecentMatches(playerAID, playerBID uint, limit int) ([]models.Match, error)
@@ -37,10 +37,24 @@ func (r *matchRepository) WithDB(tx *gorm.DB) MatchRepository {
 	return &matchRepository{db: tx, log: r.log}
 }
 
-func (r *matchRepository) GetFiltered(filter *models.MatchFilter) ([]models.Match, error) {
+func (r *matchRepository) GetFiltered(filter *models.MatchFilter) (*models.PaginatedMatches, error) {
+
 	var matches []models.Match
 
-	query := r.db.Model(&matches)
+	page := 1
+	pageSize := 50
+
+	if filter.Page != nil && *filter.Page > 0 {
+		page = *filter.Page
+	}
+
+	if filter.PageSize != nil && *filter.PageSize > 0 && *filter.PageSize <= 1000 {
+		pageSize = *filter.PageSize
+	}
+	
+	offset := (page - 1) * pageSize
+
+	query := r.db.Model(&models.Match{})
 
 	if filter.SeasonID != nil {
 		query = query.Where("season_id = ?", *filter.SeasonID)
@@ -58,8 +72,32 @@ func (r *matchRepository) GetFiltered(filter *models.MatchFilter) ([]models.Matc
 		query = query.Where("played_at <= ?", *filter.ToDate)
 	}
 
-	err := query.Find(&matches).Error
-	return matches, err
+	var total int64
+	countQuery := query
+	if err := countQuery.Count(&total).Error; err != nil {
+		return nil, err
+	}
+
+	err := query.
+		Order("played_at DESC").
+		Limit(pageSize).
+		Offset(offset).
+		Find(&matches).Error
+	if err != nil {
+		return nil, err
+	}
+
+	hasNext := int64(offset+pageSize) < total
+    
+    return &models.PaginatedMatches{
+        Data: matches,
+        Pagination: models.Pagination{
+            Page:     page,
+            PageSize: pageSize,
+            Total:    total,
+            HasNext:  hasNext,
+        },
+    }, nil
 }
 
 func (r *matchRepository) Get() ([]models.Match, error) {
@@ -115,7 +153,7 @@ func (r *matchRepository) GetRecentByPlayerID(playerID uint, limit int) ([]model
 	return matches, nil
 }
 
-func (r *matchRepository) HeadToHeadRecordMatchesCount(playerAID, playerBID uint) ( countA int64, countB int64, countC int64, err error) {
+func (r *matchRepository) HeadToHeadRecordMatchesCount(playerAID, playerBID uint) (countA int64, countB int64, countC int64, err error) {
 	var count int64
 
 	if err := r.db.Model(&models.Match{}).
