@@ -3,7 +3,7 @@ package models
 import "gorm.io/gorm"
 
 type Player struct {
-	gorm.Model
+	gorm.Model `json:"-"`
 	Name         string  `json:"name" gorm:"column:name;type:varchar(255)" binding:"required"`
 	Email        string  `json:"email" gorm:"column:email;type:varchar(255);uniqueIndex" binding:"required,email"`
 	PasswordHash string  `json:"password_hash,omitempty" gorm:"column:password_hash"`

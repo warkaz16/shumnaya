@@ -17,6 +17,7 @@ type MatchService interface {
 
 	Get() ([]models.Match, error)
 	GetFiltered(filter *models.MatchFilter) ([]models.Match, error)
+	GetHeadToHead(playerAID, playerBID uint, limit int) (*models.HeadToHeadRecord, error)
 }
 
 type matchService struct {
@@ -42,6 +43,14 @@ func (s *matchService) RecordMatch(winnerID, loserID, seasonID uint, score strin
 		// Репозитории в контексте транзакции
 		matchRepoTx := s.matchRepo.WithDB(tx)
 		standingRepoTx := s.standingRepo.WithDB(tx)
+
+		// Проверка существования сезона
+		if err := tx.First(&models.Season{}, seasonID).Error; err != nil {
+			if err == gorm.ErrRecordNotFound {
+				return errors.New("season not found")
+			}
+			return err
+		}
 
 		var winner models.Player
 		if err := tx.First(&winner, winnerID).Error; err != nil {
@@ -146,4 +155,34 @@ func (s *matchService) Get() ([]models.Match, error) {
 
 	s.logger.Info("матчи успешно получены", "количество", len(matches))
 	return matches, nil
+}
+
+func (s *matchService) GetHeadToHead(playerAID, playerBID uint, limit int) (*models.HeadToHeadRecord, error) {
+	var record models.HeadToHeadRecord
+
+	record.PlayerAID = playerAID
+	record.PlayerBID = playerBID
+
+	totalMatches, playerAWins, playerBWins, err := s.matchRepo.HeadToHeadRecordMatchesCount(playerAID, playerBID)
+	if err != nil {
+		return nil, err
+	}
+	
+	record.TotalMatches = int(totalMatches)
+	
+	record.PlayerAWins = int(playerAWins)
+	
+	record.PlayerBWins = int(playerBWins)
+
+	if limit <= 0 && limit > (int(totalMatches)) {
+		limit = 5
+	}
+
+	recentMatches, err := s.matchRepo.HeadToHeadRecentMatches(playerAID, playerBID, limit)
+	if err != nil {
+		return nil, err
+	}
+	record.LastMatchesPlayed = recentMatches
+
+	return &record, nil
 }
