@@ -3,6 +3,7 @@ package transport
 import (
 	"log/slog"
 	"shumnaya/internal/service"
+	"shumnaya/internal/transport/middleware"
 
 	"github.com/gin-gonic/gin"
 )
@@ -19,7 +20,16 @@ func RegisterRoutes(
 	playerHandler := NewPlayerHandler(r, playerService, logger)
 	seasonHandler := NewSeasonHandler(r, seasonService, standingService, logger)
 
+	// все как было
 	matchHandler.RegisterRoutes(r)
-	playerHandler.RegisterRoutes(r)
 	seasonHandler.RegisterRoutes(r)
+
+	// 🔓 публичные
+	r.POST("/players", playerHandler.Register)
+	r.POST("/login", playerHandler.Login)
+
+	// 🔐 защищённые
+	auth := r.Group("/")
+	auth.Use(middleware.AuthMiddleware())
+	auth.GET("/players/:id", playerHandler.GetByID)
 }

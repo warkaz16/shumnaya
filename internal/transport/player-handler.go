@@ -2,7 +2,6 @@ package transport
 
 import (
 	"log/slog"
-	"net/http"
 	"strconv"
 
 	"shumnaya/internal/dto"
@@ -35,22 +34,27 @@ func (h *PlayerHandler) RegisterRoutes(r *gin.Engine) {
 // @Failure 500 {object} map[string]string
 // @Router /players/{id} [get]
 func (h *PlayerHandler) GetByID(c *gin.Context) {
+	tokenPlayerID := c.GetUint("player_id")
+
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil || id <= 0 {
-		h.logger.Warn("handler: invalid player id", "id", idStr, "err", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
+		c.JSON(400, gin.H{"error": "invalid id"})
+		return
+	}
+
+	if uint(id) != tokenPlayerID {
+		c.JSON(403, gin.H{"error": "доступ запрещён"})
 		return
 	}
 
 	profile, err := h.service.GetPlayerProfile(uint(id))
 	if err != nil {
-		h.logger.Error("handler: failed to get player profile", "player_id", id, "error", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(500, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, profile)
+	c.JSON(200, profile)
 }
 
 // Register godoc
@@ -73,11 +77,13 @@ func (h *PlayerHandler) Register(c *gin.Context) {
 		return
 	}
 
-	if err := h.service.RegisterPlayer(
+	token, err := h.service.RegisterPlayer(
 		req.Name,
 		req.Email,
 		req.Password,
-	); err != nil {
+	)
+
+	if err != nil {
 		if h.logger != nil {
 			h.logger.Error(
 				"handler: ошибка регистрации игрока",
@@ -92,6 +98,25 @@ func (h *PlayerHandler) Register(c *gin.Context) {
 	}
 
 	c.JSON(201, gin.H{
-		"message": "игрок успешно зарегистрирован",
+		"token": token,
+	})
+}
+
+func (h *PlayerHandler) Login(c *gin.Context) {
+	var req dto.LoginRequest
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(400, gin.H{"error": "некорректные данные"})
+		return
+	}
+
+	token, err := h.service.Login(req.Email, req.Password)
+	if err != nil {
+		c.JSON(401, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(200, dto.LoginResponse{
+		Token: token,
 	})
 }
