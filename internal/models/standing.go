@@ -5,10 +5,10 @@ import "gorm.io/gorm"
 type Standing struct {
 	gorm.Model `json:"-"`
 
-	PlayerID uint   `json:"player_id" gorm:"column:player_id" binding:"required,min=1"`
+	PlayerID uint   `json:"player_id" gorm:"column:player_id;index:idx_standings_player_season" binding:"required,min=1"`
 	Player   Player `json:"player,omitempty" gorm:"foreignKey:PlayerID;references:ID"`
 
-	SeasonID uint   `json:"season_id" gorm:"column:season_id" binding:"required,min=1"`
+	SeasonID uint   `json:"season_id" gorm:"column:season_id;index:idx_standings_player_season;index" binding:"required,min=1"`
 	Season   Season `json:"season,omitempty" gorm:"foreignKey:SeasonID;references:ID"`
 
 	Wins   int `json:"wins" gorm:"column:wins" binding:"min=0"`
