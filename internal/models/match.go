@@ -9,19 +9,19 @@ import (
 type Match struct {
 	gorm.Model `json:"-"`
 
-	WinnerID uint   `json:"winner_id" gorm:"column:winner_id" binding:"required,min=1"`
+	WinnerID uint   `json:"winner_id" gorm:"column:winner_id;index;index:idx_matches_winner_date;index:idx_matches_head_to_head" binding:"required,min=1"`
 	Winner   Player `json:"-" gorm:"foreignKey:WinnerID;references:ID"`
 
-	LoserID uint   `json:"loser_id" gorm:"column:loser_id" binding:"required,min=1"`
+	LoserID uint   `json:"loser_id" gorm:"column:loser_id;index;index:idx_matches_loser_date;index:idx_matches_head_to_head" binding:"required,min=1"`
 	Loser   Player `json:"-" gorm:"foreignKey:LoserID;references:ID"`
 
-	SeasonID uint   `json:"season_id" gorm:"column:season_id" binding:"required,min=1"`
+	SeasonID uint   `json:"season_id" gorm:"column:season_id;index" binding:"required,min=1"`
 	Season   Season `json:"-" gorm:"foreignKey:SeasonID;references:ID"`
 
 	Score              string    `json:"score" gorm:"column:score" binding:"required"`
 	WinnerRatingChange int       `json:"winner_rating_change,omitempty" gorm:"column:winner_rating_change"`
 	LoserRatingChange  int       `json:"loser_rating_change,omitempty" gorm:"column:loser_rating_change"`
-	PlayedAt           time.Time `json:"played_at" gorm:"column:played_at"`
+	PlayedAt           time.Time `json:"played_at" gorm:"column:played_at;index;index:idx_matches_winner_date;index:idx_matches_loser_date"`
 }
 
 type MatchFilter struct {
@@ -39,10 +39,10 @@ type CreateMatchRequest struct {
 }
 
 type HeadToHeadRecord struct {
-	PlayerAID         uint      `json:"player_a_id"`
-	PlayerBID         uint      `json:"player_b_id"`
-	PlayerAWins       int      `json:"player_a_wins"`
-	PlayerBWins       int      `json:"player_b_wins"`
-	TotalMatches      int      `json:"total_matches"`
-	LastMatchesPlayed []Match   `json:"last_matches_played"`
+	PlayerAID         uint    `json:"player_a_id"`
+	PlayerBID         uint    `json:"player_b_id"`
+	PlayerAWins       int     `json:"player_a_wins"`
+	PlayerBWins       int     `json:"player_b_wins"`
+	TotalMatches      int     `json:"total_matches"`
+	LastMatchesPlayed []Match `json:"last_matches_played"`
 }
