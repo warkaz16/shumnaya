@@ -10,7 +10,6 @@ import (
 	"gorm.io/gorm"
 )
 
-
 func ConnectDB(logger *slog.Logger) *gorm.DB {
 	var err error
 
@@ -31,7 +30,7 @@ func ConnectDB(logger *slog.Logger) *gorm.DB {
 
 	password := os.Getenv("DB_PASSWORD")
 	if password == "" {
-		password = "postgres"
+		password = "12345"
 	}
 
 	dbname := os.Getenv("DB_NAME")

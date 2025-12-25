@@ -3,18 +3,21 @@ package service
 import (
 	"errors"
 	"log/slog"
- "golang.org/x/crypto/bcrypt"
+
+	"golang.org/x/crypto/bcrypt"
 
 	"shumnaya/internal/models"
 	"shumnaya/internal/repository"
+	"shumnaya/internal/utils"
 
 	"gorm.io/gorm"
 )
 
 type PlayerService interface {
 	GetPlayerProfile(id uint) (*models.PlayerProfile, error)
-		RegisterPlayer(name, email, password string) error
+	RegisterPlayer(name, email, password string) (string, error)
 
+	Login(email, password string) (string, error)
 }
 
 const defaultRecentMatchesLimit = 5
@@ -34,10 +37,10 @@ func (s *playerService) RegisterPlayer(
 	name string,
 	email string,
 	password string,
-) error {
+) (string, error) {
 
 	if _, err := s.playerRepo.GetByEmail(email); err == nil {
-		return errors.New("игрок с таким email уже существует")
+		return "", errors.New("игрок с таким email уже существует")
 	}
 
 	hash, err := bcrypt.GenerateFromPassword(
@@ -51,7 +54,7 @@ func (s *playerService) RegisterPlayer(
 				"error", err,
 			)
 		}
-		return err
+		return "", err
 	}
 
 	player := &models.Player{
@@ -69,12 +72,16 @@ func (s *playerService) RegisterPlayer(
 				"error", err,
 			)
 		}
-		return err
+		return "", err
 	}
 
-	return nil
-}
+	token, err := utils.GenerateJWT(int64(player.ID))
+	if err != nil {
+		return "", err
+	}
 
+	return token, nil
+}
 
 func (s *playerService) GetPlayerProfile(id uint) (*models.PlayerProfile, error) {
 	if id == 0 {
@@ -120,4 +127,26 @@ func (s *playerService) GetPlayerProfile(id uint) (*models.PlayerProfile, error)
 	}
 
 	return profile, nil
+}
+
+func (s *playerService) Login(email, password string) (string, error) {
+	player, err := s.playerRepo.GetByEmail(email)
+	if err != nil {
+		return "", errors.New("неверный email или пароль")
+	}
+
+	err = bcrypt.CompareHashAndPassword(
+		[]byte(player.PasswordHash),
+		[]byte(password),
+	)
+	if err != nil {
+		return "", errors.New("неверный email или пароль")
+	}
+
+	token, err := utils.GenerateJWT(int64(player.ID))
+	if err != nil {
+		return "", err
+	}
+
+	return token, nil
 }
