@@ -1,37 +1,9 @@
 ![banner](assets/banner.png)
 
-# ⚽ liga — учёт матчей и рейтингов
+# liga — учёт матчей и рейтингов
 
 Кратко
 `liga` — лёгкий и расширяемый REST-сервис для учёта матчей, игроков и таблиц сезона. Поддерживает подсчёт рейтингов (ELO), seed-данные и API для интеграции с фронтендом или админкой.
-
-Getting Started
-
-Prerequisites
-- Go >= 1.18
-- Git
-- (Опционально) Docker, Make
-
-Installation
-```bash
-git clone https://github.com/your-org/liga.git
-cd liga
-go mod download
-```
-
-Running
-- Локально (быстро):
-```bash
-go run cmd/liga/main.go
-```
-- Сборка и запуск бинарника:
-```bash
-![banner](assets/banner.png)
-
-# ⚽ liga — учёт матчей и рейтингов
-
-Кратко
-`liga` — лёгкий REST-сервис для учёта матчей, игроков и таблиц сезона. Сервис хранит результаты, считает рейтинги (ELO) и предоставляет REST API для интеграции с фронтом или админкой.
 
 Getting Started
 
@@ -83,7 +55,7 @@ docker run -p 8080:8080 liga:latest
 ```
 
 Contributors
-- 👨‍💻 Adam Gowz — основной автор
+- 👨‍💻 https://github.com/warkaz16 — основной автор
 - 🤝 PRs и issues приветствуются
 
 Ключевая технология
@@ -92,7 +64,7 @@ Contributors
 - ELO: расчёт в [utils/elo/elo.go](utils/elo/elo.go).
 
 Feedback
-- Откройте issue в репозитории или пишите на developer@your-email.example (замените на реальный).
+- Откройте issue в репозитории или пишите на warkaz16@mail.ru
 
 Примеры запросов
 ```http
