@@ -2,8 +2,8 @@ package transport
 
 import (
 	"log/slog"
-	"shumnaya/internal/service"
-	"shumnaya/internal/transport/middleware"
+	"liga/internal/service"
+	"liga/internal/transport/middleware"
 
 	"github.com/gin-gonic/gin"
 )

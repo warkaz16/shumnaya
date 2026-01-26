@@ -4,7 +4,7 @@ import (
 	"log/slog"
 	"sort"
 
-	"shumnaya/internal/models"
+	"liga/internal/models"
 
 	"gorm.io/gorm"
 )

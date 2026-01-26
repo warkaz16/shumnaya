@@ -2,7 +2,7 @@ package repository
 
 import (
 	"log/slog"
-	"shumnaya/internal/models"
+	"liga/internal/models"
 
 	"gorm.io/gorm"
 )
@@ -40,7 +40,8 @@ func (r *matchRepository) WithDB(tx *gorm.DB) MatchRepository {
 func (r *matchRepository) GetFiltered(filter *models.MatchFilter) ([]models.Match, error) {
 	var matches []models.Match
 
-	query := r.db.Model(&matches)
+	// Важно указывать конкретную модель, а не слайс, чтобы GORM корректно строил запросы и использовал индексы
+	query := r.db.Model(&models.Match{})
 
 	if filter.SeasonID != nil {
 		query = query.Where("season_id = ?", *filter.SeasonID)
@@ -58,7 +59,8 @@ func (r *matchRepository) GetFiltered(filter *models.MatchFilter) ([]models.Matc
 		query = query.Where("played_at <= ?", *filter.ToDate)
 	}
 
-	err := query.Find(&matches).Error
+	// Упорядочиваем по дате, чтобы БД могла использовать индекс по столбцу played_at
+	err := query.Order("played_at DESC").Find(&matches).Error
 	return matches, err
 }
 
@@ -86,7 +88,6 @@ func (r *matchRepository) GetByID(id uint) (*models.Match, error) {
 func (r *matchRepository) GetBySeasonID(seasonID uint) ([]models.Match, error) {
 	var matches []models.Match
 	if err := r.db.Where("season_id = ?", seasonID).
-
 		Find(&matches).Error; err != nil {
 		return nil, err
 	}
@@ -96,7 +97,6 @@ func (r *matchRepository) GetBySeasonID(seasonID uint) ([]models.Match, error) {
 func (r *matchRepository) GetByPlayerID(playerID uint) ([]models.Match, error) {
 	var matches []models.Match
 	if err := r.db.Where("winner_id = ? OR loser_id = ?", playerID, playerID).
-
 		Find(&matches).Error; err != nil {
 		return nil, err
 	}
@@ -106,7 +106,6 @@ func (r *matchRepository) GetByPlayerID(playerID uint) ([]models.Match, error) {
 func (r *matchRepository) GetRecentByPlayerID(playerID uint, limit int) ([]models.Match, error) {
 	var matches []models.Match
 	if err := r.db.Where("winner_id = ? OR loser_id = ?", playerID, playerID).
-
 		Order("played_at DESC").
 		Limit(limit).
 		Find(&matches).Error; err != nil {
@@ -115,7 +114,7 @@ func (r *matchRepository) GetRecentByPlayerID(playerID uint, limit int) ([]model
 	return matches, nil
 }
 
-func (r *matchRepository) HeadToHeadRecordMatchesCount(playerAID, playerBID uint) ( countA int64, countB int64, countC int64, err error) {
+func (r *matchRepository) HeadToHeadRecordMatchesCount(playerAID, playerBID uint) (countA int64, countB int64, countC int64, err error) {
 	var count int64
 
 	if err := r.db.Model(&models.Match{}).

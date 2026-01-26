@@ -4,8 +4,8 @@ import (
 	"errors"
 	"log/slog"
 
-	"shumnaya/internal/models"
-	"shumnaya/internal/repository"
+	"liga/internal/models"
+	"liga/internal/repository"
 )
 
 type SeasonService interface {

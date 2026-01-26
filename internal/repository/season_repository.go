@@ -3,7 +3,7 @@ package repository
 import (
 	"log/slog"
 
-	"shumnaya/internal/models"
+	"liga/internal/models"
 
 	"gorm.io/gorm"
 )

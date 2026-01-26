@@ -46,15 +46,30 @@ func ConnectDB(logger *slog.Logger) *gorm.DB {
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=%s",
 		host, user, password, dbname, port, sslmode)
 
-	db, err := gorm.Open(postgres.New(postgres.Config{
-		DSN:                  dsn,
-		PreferSimpleProtocol: true,
-	}), &gorm.Config{})
+	db, err := gorm.Open(
+		postgres.New(postgres.Config{
+			DSN: dsn,
+			// Используем подготовленные выражения и расширенный протокол для ускорения повторяющихся запросов
+			PreferSimpleProtocol: false,
+		}),
+		&gorm.Config{PrepareStmt: true},
+	)
 
 	if err != nil {
 		log.Fatal("Ошибка подключения к БД:", err)
 	}
 
 	log.Println("БД успешно подключена")
+
+	// Настройки пула соединений для повышения производительности
+	sqlDB, err := db.DB()
+	if err == nil {
+		// Разумные дефолты; при необходимости переопределяйте через переменные окружения
+		sqlDB.SetMaxOpenConns(25)
+		sqlDB.SetMaxIdleConns(10)
+		sqlDB.SetConnMaxLifetime(0) // без лимита, управляется Postgres
+	} else {
+		logger.Warn("не удалось получить sql.DB для настройки пула", "error", err)
+	}
 	return db
 }

@@ -14,7 +14,7 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 
-	"shumnaya/internal/models"
+	"liga/internal/models"
 )
 
 const (

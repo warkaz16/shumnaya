@@ -6,8 +6,8 @@ import (
 	"strconv"
 	"time"
 
-	"shumnaya/internal/models"
-	"shumnaya/internal/service"
+	"liga/internal/models"
+	"liga/internal/service"
 
 	"github.com/gin-gonic/gin"
 )

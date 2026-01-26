@@ -3,8 +3,8 @@ package service
 import (
 	"fmt"
 	"log/slog"
-	"shumnaya/internal/models"
-	"shumnaya/internal/repository"
+	"liga/internal/models"
+	"liga/internal/repository"
 )
 
 type StandingService interface {

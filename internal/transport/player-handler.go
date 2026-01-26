@@ -4,8 +4,8 @@ import (
 	"log/slog"
 	"strconv"
 
-	"shumnaya/internal/dto"
-	"shumnaya/internal/service"
+	"liga/internal/dto"
+	"liga/internal/service"
 
 	"github.com/gin-gonic/gin"
 )

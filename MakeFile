@@ -13,6 +13,16 @@ vet:
 tidy:
 	go mod tidy
 
+test:
+	go test -v ./...
+# Запуск тестов с покрытием
+test-cover:
+	go test -cover ./...
+# Генерация HTML-отчёта о покрытии
+cover-html:
+	go test -coverprofile=coverage.out ./...
+	go tool cover -html=coverage.out
+
 lint:
 	golangci-lint run
 
@@ -24,3 +34,4 @@ build:
 
 swagger:
 	cd cmd/shumnaya && swag init -g main.go -o ../../docs -d .,../../internal --parseDependency --parseInternal
+

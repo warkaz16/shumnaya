@@ -6,9 +6,9 @@ import (
 
 	"golang.org/x/crypto/bcrypt"
 
-	"shumnaya/internal/models"
-	"shumnaya/internal/repository"
-	"shumnaya/internal/utils"
+	"liga/internal/models"
+	"liga/internal/repository"
+	"liga/internal/utils"
 
 	"gorm.io/gorm"
 )

@@ -5,9 +5,9 @@ import (
 	"log/slog"
 	"time"
 
-	"shumnaya/internal/models"
-	"shumnaya/internal/repository"
-	"shumnaya/internal/utils/elo"
+	"liga/internal/models"
+	"liga/internal/repository"
+	"liga/internal/utils/elo"
 
 	"gorm.io/gorm"
 )

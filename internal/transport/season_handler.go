@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"strconv"
 
-	"shumnaya/internal/models"
-	"shumnaya/internal/service"
+	"liga/internal/models"
+	"liga/internal/service"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
