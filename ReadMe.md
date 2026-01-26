@@ -1,6 +1,4 @@
-![banner](assets/banner.png)
-
-# liga — учёт матчей и рейтингов
+# Liga — учёт матчей и рейтингов
 
 ## Описание
 `liga` — лёгкий и расширяемый REST-сервис для учёта матчей, игроков и таблиц сезона. Поддерживает подсчёт рейтингов (ELO), seed-данные и API для интеграции с фронтендом или админкой.
@@ -32,6 +30,9 @@ GET /matches?from=2025-01-01&to=2025-12-31
 GET /matches?season_id=1&from=2024-12-25&to=2025-01-25
 GET /matches?player_id=5&from=2024-12-20&to=2024-12-25
 ```
+
+## Swagger 
+![swagger-1](docs/screenshots/swagger-1.png)
 
 ## Установка
 ```bash
@@ -73,6 +74,19 @@ golangci-lint run
 ```bash
 docker build -t liga:latest .
 docker run -p 8080:8080 liga:latest
+```
+
+- Swagger (генерация и просмотр):
+```bash
+# Установите CLI (если ещё не установлен)
+go install github.com/swaggo/swag/cmd/swag@latest
+
+# Сгенерировать docs (в корне проекта)
+swag init -g cmd/liga/main.go -o docs -d .,internal
+
+# Запустить сервер и открыть документацию
+go run cmd/liga/main.go
+# Откройте: http://localhost:8080/swagger/index.html
 ```
 
 ## Участники
