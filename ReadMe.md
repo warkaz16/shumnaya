@@ -90,7 +90,9 @@ go run cmd/liga/main.go
 ```
 
 ## Участники
-- 👨‍💻 https://github.com/warkaz16 — основной автор
+- 👨‍💻 https://github.com/warkaz16
+- 👨‍💻 https://github.com/Alsiev
+- 👨‍💻 https://github.com/tsuruevimran17
 - 🤝 PRs и issues приветствуются
 
 ## Ключевая технология
