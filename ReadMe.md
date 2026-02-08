@@ -13,7 +13,7 @@
 ## Prerequisites
 - Go >= 1.18
 - Git
-- (Опционально) Docker, Make
+- (Опционально) Docker, MakeFile
 
 ## Архитектура
 ```mermaid
